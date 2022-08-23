@@ -37,8 +37,8 @@ class MK8Deluxe(Database):
 
     def _buildQuery(self, entity: EntityId = None) -> str:
         return (
-            f"select d.id as {entity.value}_id, d.ground_speed as speed, d.acceleration, "
-            "d.weight, d.ground_handling as handling, d.traction, d.miniturbo "
+            f"select d.id as {entity.value}_id, "
+            f"{', '.join(PARTS_ATTRIBUTES)} "
             f"from {TABLE_NAMES[entity]} as d"
         )
 
@@ -52,19 +52,12 @@ class MK8Deluxe(Database):
 
         return [dict(zip(cols, row)) for row in rows]
 
-    def __getattribute__(self, __name: str) -> list[Entity]:
-        attributes_map = {
-            "drivers": EntityId.DRIVER,
-            "vehicles": EntityId.VEHICLE,
-            "tyres": EntityId.TYRE,
-            "gliders": EntityId.GLIDER,
-        }
-
-        if __name not in attributes_map:
+    def __getattr__(self, __name: str) -> list[Entity]:
+        if __name not in [x.value for x in EntityId]:
             return super().__getattribute__(__name)
 
-        results = self._queryEntities(attributes_map[__name])
-        return (PartFactory(attributes_map[__name]).build(**row) for row in results)
+        results = self._queryEntities(EntityId(__name))
+        return (PartFactory(EntityId(__name)).build(**row) for row in results)
 
 
 class MK8DeluxeBuilds(MK8Deluxe):
@@ -83,11 +76,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         self._limit = None
 
     def _buildQuery(self, *_) -> str:
-        q = (
-            "select  b.driver_id, b.vehicle_id, b.tyre_id, b.glider_id, "
-            "b.speed, b.acceleration, b.weight, b.handling, b.traction, b.miniturbo "
-            "from builds as b "
-        )
+        q = "select * from builds as b "
 
         if self._sql_filter:
             q += f"where {' and '.join(self._sql_filter)}"

@@ -6,10 +6,10 @@ def build() -> list[Entity]:
     m = MK8Deluxe()
     builds = []
 
-    for d in m.drivers:
-        for v in m.vehicles:
-            for t in m.tyres:
-                for g in m.gliders:
+    for d in m.driver:
+        for v in m.vehicle:
+            for t in m.tyre:
+                for g in m.glider:
                     builds.append(d + v + t + g)
 
     return builds

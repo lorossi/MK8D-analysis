@@ -5,7 +5,7 @@ def main():
     m = MK8DeluxeBuilds()
     # use m.available_filters to get a list of available filters
     # assign the value to the corresponding attribute of the MK8DeluxeBuilds object
-    m.min_speed = 12
+    m.min_ground_speed = 12
     m.min_acceleration = 12
     m.min_miniturbo = 5
 

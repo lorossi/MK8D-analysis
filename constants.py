@@ -18,10 +18,16 @@ TABLE_NAMES = {
 }
 
 PARTS_ATTRIBUTES = [
-    "speed",
+    "ground_speed",
+    "water_speed",
+    "air_speed",
+    "antigravity_speed",
     "acceleration",
     "weight",
-    "handling",
+    "ground_handling",
+    "water_handling",
+    "air_handling",
+    "antigravity_handling",
     "traction",
     "miniturbo",
 ]

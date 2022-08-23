@@ -1,6 +1,8 @@
 from statistics import stdev
 from constants import EntityId, PARTS_ATTRIBUTES, ID_ATTRIBUTES
 
+from usjon import dumps
+
 
 class Entity:
     def __init__(self, entity_id: EntityId, **kwargs) -> None:
@@ -89,15 +91,48 @@ class NamedBuild:
         for k, v in kwargs.items():
             self.__setattr__(k, v)
 
+        self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
+        self._weights["ground_speed"] = 0.5
+        self._weights["acceleration"] = 0.5
+
     def __str__(self) -> str:
         return f"('score': {self.score}), ('stdev': {self.score_dev}), " + ", ".join(
             str(a) for a in self.__dict__.items()
         )
 
+    def toJSON(self, indent=0, sort_keys=False) -> str:
+        json_dict = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+        json_dict["score"] = self.score
+        json_dict["score_dev"] = self.score_dev
+        return dumps(json_dict, indent=indent, sort_keys=sort_keys)
+
     @property
     def score(self) -> float:
-        return (self.speed + self.acceleration) / 2
+        items = set(self.__dict__.keys()) & set(PARTS_ATTRIBUTES)
+        return sum(self._weights[v] * self.__getattribute__(v) for v in list(items))
 
     @property
     def score_dev(self) -> float:
-        return stdev([self.speed, self.acceleration])
+        return stdev(
+            [self.__dict__[k] for k in PARTS_ATTRIBUTES if self._weights[k] != 0]
+        )
+
+    @property
+    def weights(self) -> dict[str, float]:
+        return self._weights
+
+    @weights.setter
+    def weights(self, w: dict[str, float]) -> None:
+        if sum(w.values()) != 1:
+            raise ValueError("weights must sum to 1")
+
+        for k, v in w.items():
+            if k not in PARTS_ATTRIBUTES:
+                raise ValueError(f"{w} is not a valid weight")
+            if not isinstance(k, float):
+                raise TypeError(f"{w} is not a valid weight")
+            if v < 0 or v > 1:
+                raise ValueError(f"{w} is not a valid weight")
+
+        for k, v in w.items():
+            self._weights[k] = v
