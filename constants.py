@@ -28,4 +28,4 @@ PARTS_ATTRIBUTES = [
 
 ID_ATTRIBUTES = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
 
-DATA_ATTRIBUTES = ["score", "std_dev"]
+DATA_ATTRIBUTES = ["score", "score_dev"]

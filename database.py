@@ -1,5 +1,5 @@
 import sqlite3
-from re import findall, match
+from re import Match, match
 
 from entities import (
     Entity,
@@ -79,6 +79,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         self._sql_filter = []
         self._data_filter = []
         self._sort = []
+        self._hide = []
         self._limit = None
 
     def _buildQuery(self, *_) -> str:
@@ -93,34 +94,48 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         return q
 
+    def _setFilter(self, match: Match, value: int) -> None:
+        if match.group(2) in PARTS_ATTRIBUTES:
+            match match.group(1):
+                case "min":
+                    self._sql_filter.append(f"b.{match.group(2)} >= {value}")
+                case "max":
+                    self._sql_filter.append(f"b.{match.group(2)} <= {value}")
+            return
+
+        if match.group(2) in DATA_ATTRIBUTES:
+            match match.group(1):
+                case "min":
+                    self._data_filter.append(
+                        lambda x: x.__getattribute__(match.group(2)) >= value
+                    )
+                case "max":
+                    self._data_filter.append(
+                        lambda x: x.__getattribute__(match.group(2)) <= value
+                    )
+
+            return
+
+        raise AttributeError(f"{match.group(2)} is not a valid filter")
+
+    def _setSort(self, match: Match, direction: int) -> None:
+        if match.group(1) in PARTS_ATTRIBUTES + DATA_ATTRIBUTES and direction in [
+            -1,
+            1,
+        ]:
+            self._sort.append((match.group(1), direction == -1))
+            return
+
+        raise AttributeError(f"{match.group(1)} is not a valid sort")
+
     def __setattr__(self, __name: str, __value) -> None:
-        if f := match(r"(min|max)_([a-z]+)", __name):
+        if f := match(r"(min|max)_([a-z_]+)", __name):
+            self._setFilter(f, __value)
+            return
 
-            if f.group(2) in PARTS_ATTRIBUTES:
-                match f.group(1):
-                    case "min":
-                        self._sql_filter.append(f"b.{f.group(2)} >= {__value}")
-                    case "max":
-                        self._sql_filter.append(f"b.{f.group(2)} <= {__value}")
-                return
-
-            if f.group(2) in DATA_ATTRIBUTES:
-                match f.group(1):
-                    case "min":
-                        self._data_filter.append(
-                            lambda x: x.__getattribute__(f.group(2)) >= __value
-                        )
-                    case "max":
-                        self._data_filter.append(
-                            lambda x: x.__getattribute__(f.group(2)) <= __value
-                        )
-
-                return
-
-        if f := match(r"sort_([a-z]+)", __name):
-            if f.group(1) in DATA_ATTRIBUTES and __value in [-1, 1]:
-                self._sort.append((f.group(1), __value == -1))
-                return
+        if f := match(r"sort_([a-z_]+)", __name):
+            self._setSort(f, __value)
+            return
 
         if __name == "limit":
             self._limit = __value
@@ -167,7 +182,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
             if all(f(b) for f in self._data_filter)
         ]
 
-        for f in self._sort:
+        for f in self._sort[::-1]:
             builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
 
         if self._limit is not None:
