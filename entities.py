@@ -1,7 +1,7 @@
 from statistics import stdev
 from constants import EntityId, PARTS_ATTRIBUTES, ID_ATTRIBUTES
 
-from usjon import dumps
+from ujson import dumps
 
 
 class Entity:
@@ -62,7 +62,13 @@ class Entity:
         )
 
     def getCSVCols(self) -> str:
-        return ",".join(str(k) for k in self.__dict__.keys() if not k.startswith("_"))
+        return ",".join(self.getCols())
+
+    def getCols(self) -> list[str]:
+        return [k for k in self.__dict__.keys() if not k.startswith("_")]
+
+    def getRow(self) -> list[str | int]:
+        return [self.__getattribute__(k) for k in self.getCols()]
 
 
 class Part(Entity):
