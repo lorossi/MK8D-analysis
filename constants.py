@@ -7,7 +7,6 @@ class EntityId(Enum):
     TYRE = "tyre"
     GLIDER = "glider"
     BUILD = "build"
-    SLIM_BUILD = "slim_build"
 
 
 TABLE_NAMES = {
@@ -15,7 +14,18 @@ TABLE_NAMES = {
     EntityId.VEHICLE: "vehicles",
     EntityId.TYRE: "tyres",
     EntityId.GLIDER: "gliders",
+    EntityId.BUILD: "builds",
 }
 
-VARIABLES = ["speed", "acceleration", "weight", "handling", "traction", "miniturbo"]
-IDS = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
+PARTS_ATTRIBUTES = [
+    "speed",
+    "acceleration",
+    "weight",
+    "handling",
+    "traction",
+    "miniturbo",
+]
+
+ID_ATTRIBUTES = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
+
+DATA_ATTRIBUTES = ["score", "std_dev"]
