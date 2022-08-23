@@ -30,6 +30,24 @@ class Database:
         self._cur.execute(q)
         return [i[0] for i in self._cur.description]
 
+    def deleteTable(self, table: str):
+        q = f"drop table {table}"
+        try:
+            self._cur.execute(q)
+        except sqlite3.OperationalError:
+            print(f"Table {table} does not exist")
+
+    def createTable(self, table: str, cols: list):
+        q = f"create table {table} ({', '.join(cols)})"
+        self._cur.execute(q)
+
+    def insert(self, table: str, cols: list, values: list):
+        q = f"insert into {table} ({', '.join(cols)}) values ({', '.join(str(v) for v in values)})"
+        self._cur.execute(q)
+
+    def applyChanges(self):
+        self._con.commit()
+
 
 class MK8Deluxe(Database):
     def __init__(self):
