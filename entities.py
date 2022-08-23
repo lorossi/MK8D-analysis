@@ -1,13 +1,15 @@
-from constants import EntityId, COLUMN_IDS, VARIABLES
+from constants import EntityId, VARIABLES, IDS
 
 
 class Entity:
     def __init__(self, entity_id: EntityId, **kwargs) -> None:
-        self.entity_id = entity_id
-        self.name = kwargs.get("name")
+        self._entity_id = entity_id
 
         for v in VARIABLES:
             self.__setattr__(v, kwargs.get(v, 0))
+
+        for i in IDS:
+            self.__setattr__(i, kwargs.get(i, None))
 
     def __str__(self) -> str:
         return ", ".join(
@@ -26,18 +28,15 @@ class Entity:
                 f"'{self.__class__.__name__}' and '{type(other)}'"
             )
 
-        kwargs = self._sumAttributes(other)
+        kwargs = self._addAttributes(other)
         return Build(**kwargs)
 
-    def _sumAttributes(self, other: object) -> dict[str, int | str]:
-        common = set(self.__dict__.keys()) & set(other.__dict__.keys())
+    def _addAttributes(self, other: object) -> dict[str, int | str]:
+        common = set(self.__dict__.keys()) & set(other.__dict__.keys()) - set(IDS)
 
         kwargs = {}
 
         for k in common:
-            if k in COLUMN_IDS:
-                continue
-
             if isinstance(self.__dict__[k], int) or isinstance(other.__dict__[k], int):
                 kwargs[k] = self.__dict__[k] + other.__dict__[k]
             elif isinstance(self.__dict__[k], str) or isinstance(
@@ -45,13 +44,22 @@ class Entity:
             ):
                 kwargs[k] = self.__dict__[k] + " - " + other.__dict__[k]
 
+        for i in IDS:
+            if self.__getattribute__(i) is None:
+                if other.__getattribute__(i) is not None:
+                    kwargs[i] = other.__getattribute__(i)
+            else:
+                kwargs[i] = self.__getattribute__(i)
+
         return kwargs
 
     def toCSV(self) -> str:
-        return ",".join(str(v) for v in self.__dict__.values())
+        return ",".join(
+            str(v) for k, v in self.__dict__.items() if not k.startswith("_")
+        )
 
     def getCSVCols(self) -> str:
-        return ",".join(str(v) for v in self.__dict__.keys())
+        return ",".join(str(k) for k in self.__dict__.keys() if not k.startswith("_"))
 
 
 class Driver(Entity):
@@ -78,66 +86,3 @@ class Glider(Entity):
 class Build(Entity):
     def __init__(self, **kwargs: dict) -> None:
         super().__init__(entity_id=EntityId.BUILD, **kwargs)
-
-    def _sumAttributes(self, other: object) -> dict[str, int | str]:
-        return super()._sumAttributes(other)
-
-
-class SlimComponent(Entity):
-    def __init__(self, entity_id: EntityId, **kwargs) -> None:
-        self.entity_id = entity_id
-        for v in VARIABLES:
-            self.__setattr__(v, kwargs.get(v, 0))
-
-        for v in COLUMN_IDS:
-            self.__setattr__(v, kwargs.get(v, None))
-
-    def _addIds(self, *others: list[object]) -> dict[str, int]:
-        ids = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
-        for i in ids:
-            for o in others:
-                if (v := o.__getattribute__(i)) is not None:
-                    self.__setattr__(i, v)
-
-    def __add__(self, other: object):
-        if all(
-            not isinstance(other, c)
-            for c in [SlimDriver, SlimVehicle, SlimTyre, SlimGlider, SlimBuild]
-        ):
-            raise TypeError(
-                f"unsupported operand type(s) for +: "
-                f"'{self.__class__.__name__}' and '{type(other)}'"
-            )
-
-        kwargs = self._sumAttributes(other)
-
-        new_build = SlimBuild(**kwargs)
-        new_build._addIds(self, other)
-        return new_build
-
-
-class SlimDriver(SlimComponent):
-    def __init__(self, **kwargs: dict) -> None:
-        super().__init__(entity_id=EntityId.DRIVER, **kwargs)
-
-
-class SlimVehicle(SlimComponent):
-    def __init__(self, **kwargs: dict) -> None:
-        super().__init__(entity_id=EntityId.VEHICLE, **kwargs)
-
-
-class SlimTyre(SlimComponent):
-    def __init__(self, **kwargs: dict) -> None:
-        super().__init__(entity_id=EntityId.TYRE, **kwargs)
-
-
-class SlimGlider(SlimComponent):
-    def __init__(self, **kwargs: dict) -> None:
-        super().__init__(entity_id=EntityId.GLIDER, **kwargs)
-
-
-class SlimBuild(SlimComponent):
-    def __init__(self, **kwargs: dict) -> None:
-        super().__init__(entity_id=EntityId.SLIM_BUILD, **kwargs)
-        for i in COLUMN_IDS:
-            self.__setattr__(i, None)

@@ -1,9 +1,9 @@
-from database import MK8Deluxe, SlimMK8Deluxe
+from database import MK8Deluxe
 from entities import Entity
 
 
-def build(instance: object) -> list[Entity]:
-    m = instance()
+def build() -> list[Entity]:
+    m = MK8Deluxe()
     builds = []
 
     for d in m.drivers:
@@ -22,14 +22,8 @@ def write_to_file(builds: list[Entity], path: str):
 
 
 def main():
-    to_run = [
-        {"instance": MK8Deluxe, "destination": "builds.csv"},
-        {"instance": SlimMK8Deluxe, "destination": "builds_slim.csv"},
-    ]
-
-    for execution in to_run:
-        builds = build(execution["instance"])
-        write_to_file(builds, execution["destination"])
+    builds = build()
+    write_to_file(builds, "builds.csv")
 
 
 if __name__ == "__main__":

@@ -17,6 +17,5 @@ TABLE_NAMES = {
     EntityId.GLIDER: "gliders",
 }
 
-COLUMN_IDS = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
 VARIABLES = ["speed", "acceleration", "weight", "handling", "traction", "miniturbo"]
-BUILD_VARIABLES = ["driver", "vehicle", "tyres", "gliders"]
+IDS = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
