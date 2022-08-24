@@ -17,20 +17,18 @@ def build() -> list[Entity]:
 
 def write_to_file(builds: list[Entity], path: str):
     with open(path, "w") as f:
-        f.write(builds[0].getCSVCols() + "\n")
-        f.writelines(b.toCSV() + "\n" for b in builds)
+        f.write(builds[0].csv_cols + "\n")
+        f.writelines(b.csv + "\n" for b in builds)
 
 
 def write_to_sql(builds: list[Entity], path: str):
     d = Database("MK8D")
 
-    cols = builds[0].getCols()
-
     d.deleteTable("builds")
-    d.createTable("builds", cols)
+    d.createTable("builds", builds[0].cols)
 
     for b in builds:
-        d.insert("builds", cols, b.getRow())
+        d.insert("builds", b.cols, b.rows)
 
     d.applyChanges()
 

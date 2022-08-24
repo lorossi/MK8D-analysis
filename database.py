@@ -92,6 +92,9 @@ class MK8DeluxeBuilds(MK8Deluxe):
         self._sort = []
         self._hide = []
         self._limit = None
+        self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
+        self._weights["ground_speed"] = 0.5
+        self._weights["acceleration"] = 0.5
 
     def _buildQuery(self, *_) -> str:
         q = "select * from builds as b "
@@ -135,6 +138,17 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         raise AttributeError(f"{match.group(1)} is not a valid sort")
 
+    def _setWeight(self, match: Match, value: float) -> None:
+        if match.group(1) not in PARTS_ATTRIBUTES:
+            raise AttributeError(f"{match.group(1)} is not a valid weight")
+
+        if not isinstance(value, float):
+            raise TypeError(f"{value} is not a valid weight")
+        if value < 0:
+            raise ValueError(f"{value} is not a valid weight")
+
+        self._weights[match.group(1)] = value
+
     def __setattr__(self, __name: str, __value) -> None:
         if f := match(r"(min|max)_([a-z_]+)", __name):
             self._setFilter(f, __value)
@@ -142,6 +156,10 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         if f := match(r"sort_([a-z_]+)", __name):
             self._setSort(f, __value)
+            return
+
+        if f := match(r"weight_([a-z_]+)", __name):
+            self._setWeight(f, __value)
             return
 
         if __name == "limit":
@@ -185,7 +203,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         builds = [
             b
-            for b in [NamedBuild(**row) for row in results]
+            for b in [NamedBuild(**row, _weights=self._weights) for row in results]
             if all(f(b) for f in self._data_filter)
         ]
 
@@ -198,7 +216,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return builds
 
     @property
-    def available_filters(self) -> str:
+    def available_filters(self) -> list[str]:
         return [
             (f"{a}_{b}")
             for a in ["min", "max"]
@@ -206,5 +224,13 @@ class MK8DeluxeBuilds(MK8Deluxe):
         ]
 
     @property
-    def available_sorts(self) -> str:
+    def available_sorts(self) -> list[str]:
         return [f"sort_{a}" for a in DATA_ATTRIBUTES]
+
+    @property
+    def available_weights(self) -> list[str]:
+        return [f"weight_{a}" for a in PARTS_ATTRIBUTES]
+
+    @property
+    def weights(self) -> dict[str, float]:
+        return self._weights
