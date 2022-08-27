@@ -1,3 +1,7 @@
+"""This module contains the code to create the builds with part names instead of ids,  \
+as they are saved in the database.
+
+The class offers the ability to sort, filter and score each of them."""
 from database import MK8DeluxeBuilds
 
 

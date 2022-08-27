@@ -1,7 +1,14 @@
+"""Module containing constants for the project."""
 from enum import Enum
 
 
 class EntityId(Enum):
+    """Id containing the entity of a part.
+
+    Args:
+        Enum (str)
+    """
+
     DRIVER = "driver"
     VEHICLE = "vehicle"
     TYRE = "tyre"

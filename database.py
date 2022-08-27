@@ -1,3 +1,5 @@
+"""This module contains the Database class and all its subclasses."""
+
 import sqlite3
 from re import Match, match
 
@@ -8,8 +10,8 @@ from entities import (
     PartFactory,
 )
 from constants import (
-    PARTS_ATTRIBUTES,
     EntityId,
+    PARTS_ATTRIBUTES,
     TABLE_NAMES,
     ID_ATTRIBUTES,
     DATA_ATTRIBUTES,
@@ -17,43 +19,96 @@ from constants import (
 
 
 class Database:
+    """Class handling a generic database."""
+
     def __init__(self, path: str):
+        """Create a database object.
+
+        Args:
+            path (str): Path to the SQLite database file.
+        """
         self._path = path
         self._con = sqlite3.connect(self._path)
         self._cur = self._con.cursor()
 
-    def query(self, q: str):
+    def query(self, q: str) -> list:
+        """Make a query to the database.
+
+        Args:
+            q (str): Query to make to the database.
+
+        Returns:
+            list: Result of the query.
+        """
         self._cur.execute(q)
         return self._cur.fetchall()
 
-    def getCols(self, q: str):
+    def getCols(self, q: str) -> list[str]:
+        """Get the column names relative to a query in the database.
+
+        Args:
+            q (str): Query to make to the database.
+
+        Returns:
+            list[str]: list of column names.
+        """
         self._cur.execute(q)
         return [i[0] for i in self._cur.description]
 
     def deleteTable(self, table: str):
-        q = f"drop table {table}"
+        """Delete (drop) a table from the database.
+
+        Args:
+            table (str): Name of the table to drop.
+        """
+        q = f"DROP TABLE {table}"
         try:
             self._cur.execute(q)
         except sqlite3.OperationalError:
             print(f"Table {table} does not exist")
 
     def createTable(self, table: str, cols: list):
-        q = f"create table {table} ({', '.join(cols)})"
+        """Create a table in the database.
+
+        Args:
+            table (str): name of the table to create.
+            cols (list): list of columns to create.
+        """
+        q = f"CREATE TABLE {table} ({', '.join(cols)})"
         self._cur.execute(q)
 
     def insert(self, table: str, cols: list, values: list):
-        q = f"insert into {table} ({', '.join(cols)}) values ({', '.join(str(v) for v in values)})"
+        """Insert a row in a table.
+
+        Args:
+            table (str): name of the table to insert into.
+            cols (list): name of the columns to insert into.
+            values (list): values to insert.
+        """
+        q = f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(str(v) for v in values)})"
         self._cur.execute(q)
 
     def applyChanges(self):
+        """Apply changes to the database."""
         self._con.commit()
 
 
 class MK8Deluxe(Database):
+    """Class handling the MK8 Deluxe database."""
+
     def __init__(self):
+        """Create a MK8Deluxe object."""
         super().__init__("MK8D")
 
-    def _buildQuery(self, entity: EntityId = None) -> str:
+    def _buildQuery(self, entity: EntityId) -> str:
+        """Build a string query to get the data from the database.
+
+        Args:
+            entity (EntityId): Id of the entity to query.
+
+        Returns:
+            str: Query to pass to the database.
+        """
         return (
             f"select d.id as {entity.value}_id, "
             f"{', '.join(PARTS_ATTRIBUTES)} "
@@ -64,6 +119,14 @@ class MK8Deluxe(Database):
         self,
         entity: EntityId,
     ) -> list[dict[str, float | str]]:
+        """Query the database for a specific entity.
+
+        Args:
+            entity (EntityId): Id of the entity to query.
+
+        Returns:
+            list[dict[str, float | str]]: list of dictionaries containing the data.
+        """
         query = self._buildQuery(entity)
         rows = self.query(query)
         cols = self.getCols(query)
@@ -71,41 +134,69 @@ class MK8Deluxe(Database):
         return [dict(zip(cols, row)) for row in rows]
 
     def __getattr__(self, __name: str) -> list[Entity]:
+        """Get an entity from the database.
+
+        Args:
+            __name (str): name of the entity.
+
+        Returns:
+            list[Entity]: list of entities.
+        """
         if __name not in [x.value for x in EntityId]:
             return super().__getattribute__(__name)
 
         results = self._queryEntities(EntityId(__name))
+
+        if not results:
+            raise AttributeError(f"Entity {__name} does not exist")
+
         return (PartFactory(EntityId(__name)).build(**row) for row in results)
 
 
 class MK8DeluxeBuilds(MK8Deluxe):
-    """Return a list of builds. Accept filters as parameters.
-
-    Args:
-        MK8Deluxe (_type_): _description_
-    """
+    """Class handling the MK8Deluxe builds database."""
 
     def __init__(self):
+        """Create a MK8DeluxeBuilds object."""
         super().__init__()
-        self._sql_filter = []
-        self._data_filter = []
-        self._sort = []
-        self._hide = []
+        self._sql_filter = []  # filter for attributes
+        self._data_filter = []  # filter for data attributes such as score or stddev
+        self._sort = []  # list of attributes to sort by
         self._limit = None
+
+        # weights of the attributes for the score calculation
         self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
         self._weights["ground_speed"] = 0.5
         self._weights["acceleration"] = 0.5
 
     def _buildQuery(self, *_) -> str:
-        q = "select * from builds as b "
+        """Build a query to get the data from the database.
 
+        Returns:
+            str: query to pass to the database.
+        """
+        q = "SELECT * FROM builds AS b "
+
+        # add filters to the query
         if self._sql_filter:
             q += f"where {' and '.join(self._sql_filter)}"
 
         return q
 
     def _setFilter(self, match: Match, value: int) -> None:
+        """Set a filter for the query.
+
+        Args:
+            match (Match): Match object containing the filter.
+            value (int): Value of the filter.
+
+        Raises:
+            AttributeError: Filter is not valid.
+        """
+        # filter any part attribute
+        # these filters are passed to the SQL query
         if match.group(2) in PARTS_ATTRIBUTES:
+            # differentiate between min and max
             match match.group(1):
                 case "min":
                     self._sql_filter.append(f"b.{match.group(2)} >= {value}")
@@ -113,6 +204,8 @@ class MK8DeluxeBuilds(MK8Deluxe):
                     self._sql_filter.append(f"b.{match.group(2)} <= {value}")
             return
 
+        # filter any data attribute
+        # these filters are passed to the data after the query
         if match.group(2) in DATA_ATTRIBUTES:
             match match.group(1):
                 case "min":
@@ -126,9 +219,19 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
             return
 
+        # raise error for invalid filter
         raise AttributeError(f"{match.group(2)} is not a valid filter")
 
     def _setSort(self, match: Match, direction: int) -> None:
+        """Set a sort for the query.
+
+        Args:
+            match (Match): Match object containing the sort.
+            direction (int): Direction of the sort (1 ascending, -1 descending).
+
+        Raises:
+            AttributeError: sort is not valid.
+        """
         if match.group(1) in PARTS_ATTRIBUTES + DATA_ATTRIBUTES and direction in [
             -1,
             1,
@@ -139,6 +242,17 @@ class MK8DeluxeBuilds(MK8Deluxe):
         raise AttributeError(f"{match.group(1)} is not a valid sort")
 
     def _setWeight(self, match: Match, value: float) -> None:
+        """Set weight for score calculation for a specific attribute.
+
+        Args:
+            match (Match): Match object containing the attribute.
+            value (float): Weight of the attribute.
+
+        Raises:
+            AttributeError: Attribute is not valid.
+            TypeError: Value is not a float.
+            ValueError: Value is less than 0.
+        """
         if match.group(1) not in PARTS_ATTRIBUTES:
             raise AttributeError(f"{match.group(1)} is not a valid weight")
 
@@ -150,22 +264,35 @@ class MK8DeluxeBuilds(MK8Deluxe):
         self._weights[match.group(1)] = value
 
     def __setattr__(self, __name: str, __value) -> None:
+        """Set an attribute of the object.
+
+        Args:
+            __name (str): name of the attribute.
+            __value (_type_): value of the attribute.
+        """
+        # try to match the attribute name to a filter
         if f := match(r"(min|max)_([a-z_]+)", __name):
             self._setFilter(f, __value)
             return
 
+        # try to match the attribute name to a sort
         if f := match(r"sort_([a-z_]+)", __name):
             self._setSort(f, __value)
             return
 
+        # try to match the attribute name to a weight
         if f := match(r"weight_([a-z_]+)", __name):
             self._setWeight(f, __value)
             return
 
+        # set the limit
         if __name == "limit":
+            if not isinstance(__value, int):
+                raise TypeError(f"{__value} is not a valid limit")
             self._limit = __value
             return
 
+        # reset the sorting order
         if __name == "sort" and __value is None:
             self._sort = []
             return
@@ -173,43 +300,72 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return super().__setattr__(__name, __value)
 
     def getNames(self, entity_id: EntityId, entity_code: int) -> list[str]:
+        """Get names relative to a specific part, given its code.
+
+        Args:
+            entity_id (EntityId): Id of the entity.
+            entity_code (int): Code of the entity.
+
+        Returns:
+            list[str]: List of names relative to the entity.
+        """
         q = (
-            f"select e.name "
-            f"from {TABLE_NAMES[entity_id]}_names as e "
-            f"where e.id = {entity_code}"
+            f"SELECT E.NAME "
+            f"FROM {TABLE_NAMES[entity_id]}_names AS E "
+            f"WHERE e.id = {entity_code}"
         )
         return [r[0] for r in self.query(q)]
 
     @property
     def builds(self) -> list[Build]:
+        """Get the builds.
+
+        Returns:
+            list[Build]: list of builds.
+        """
         results = self._queryEntities(EntityId.BUILD)
         return [Build(**row) for row in results]
 
     @property
     def named_builds(self) -> list[NamedBuild]:
+        """Get the builds with parts names.
+
+        Returns:
+            list[NamedBuild]: list of builds with parts names.
+        """
+        # get all results
         results = self._queryEntities(EntityId.BUILD)
+
         for x, r in enumerate(results):
             names = {}
+            # get names for each part
             for e in EntityId:
+                # skip the build Entities as they are not named
                 if e == EntityId.BUILD:
                     continue
 
+                # save all the names for the part
                 names[e.value] = [x for x in self.getNames(e, r.get(f"{e.value}_id"))]
 
+            # save the names in the results
             results[x].update(names)
 
+            # delete the ids from the results
             for i in ID_ATTRIBUTES:
                 del results[x][i]
 
+        # create the named builds
         builds = [
             b
             for b in [NamedBuild(**row, _weights=self._weights) for row in results]
-            if all(f(b) for f in self._data_filter)
+            if all(f(b) for f in self._data_filter)  # apply data filters
         ]
 
+        # sort the builds
         for f in self._sort[::-1]:
             builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
 
+        # limit the builds
         if self._limit is not None:
             builds = builds[: self._limit]
 
@@ -217,6 +373,15 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
     @property
     def available_filters(self) -> list[str]:
+        """List all the available filters for the build.
+
+        Pass the filter name to the instance of the object to set it.
+        The attribute accepts a value.
+
+
+        Returns:
+            list[str]
+        """
         return [
             (f"{a}_{b}")
             for a in ["min", "max"]
@@ -225,12 +390,33 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
     @property
     def available_sorts(self) -> list[str]:
+        """List all the available sorts for the build.
+
+        Pass the sort name to the instance of the object to set it.
+        The attribute accepts a value of 1 for ascending and -1 for descending.
+
+        Returns:
+            list[str]
+        """
         return [f"sort_{a}" for a in DATA_ATTRIBUTES]
 
     @property
     def available_weights(self) -> list[str]:
+        """List all the available weights for the scoring of the builds.
+
+        Pass the weight name to the instance of the object to set it.
+        The attribute accepts a value of type float.
+
+        Returns:
+            list[str]
+        """
         return [f"weight_{a}" for a in PARTS_ATTRIBUTES]
 
     @property
     def weights(self) -> dict[str, float]:
+        """Return all the weights used for the scoring of the builds.
+
+        Returns:
+            dict[str, float]
+        """
         return self._weights

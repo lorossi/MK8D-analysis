@@ -1,8 +1,14 @@
+"""This module contains the code to create the builds and save them to the SQLite database."""
 from database import Database, MK8Deluxe
 from entities import Entity
 
 
 def build() -> list[Entity]:
+    """Create and return the builds.
+
+    Returns:
+        list[Entity]: list of builds
+    """
     m = MK8Deluxe()
     builds = []
 
@@ -16,13 +22,25 @@ def build() -> list[Entity]:
 
 
 def write_to_file(builds: list[Entity], path: str):
+    """Write the builds to a csv file.
+
+    Args:
+        builds (list[Entity]): The builds to write.
+        path (str): The path to the file.
+    """
     with open(path, "w") as f:
         f.write(builds[0].csv_cols + "\n")
         f.writelines(b.csv + "\n" for b in builds)
 
 
 def write_to_sql(builds: list[Entity], path: str):
-    d = Database("MK8D")
+    """Write the builds to a SQL file.
+
+    Args:
+        builds (list[Entity]): The builds to write.
+        path (str): The path to the file.
+    """
+    d = Database(path)
 
     d.deleteTable("builds")
     d.createTable("builds", builds[0].cols)
