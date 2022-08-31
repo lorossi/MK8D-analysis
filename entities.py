@@ -226,9 +226,7 @@ class NamedBuild:
             float
         """
         items = set(self.__dict__.keys()) & set(PARTS_ATTRIBUTES)
-        return sum(
-            self._weights[v] * self.__getattribute__(v) for v in list(items)
-        ) / sum(self._weights.values())
+        return sum(self._weights[v] * self.__getattribute__(v) for v in list(items))
 
     @property
     def score_dev(self) -> float:
@@ -240,5 +238,9 @@ class NamedBuild:
             float
         """
         return stdev(
-            [self.__dict__[k] for k in PARTS_ATTRIBUTES if self._weights[k] != 0]
+            [
+                self.__dict__[k] * self._weights[k]
+                for k in PARTS_ATTRIBUTES
+                if self._weights[k] != 0
+            ]
         )

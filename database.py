@@ -287,6 +287,9 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         # set the limit
         if __name == "limit":
+            if __value is None:
+                self._limit = None
+                return
             if not isinstance(__value, int):
                 raise TypeError(f"{__value} is not a valid limit")
             self._limit = __value
