@@ -9,7 +9,7 @@ from database import MK8DeluxeBuilds
 
 def gather_parameters(argv: list) -> dict:
     """Gather the parameters from the command line and return them as a dictionary."""
-    if len(argv) < 2:
+    if "-h" in argv:
         print(
             "Usage: python3 find_builds.py "
             "[--csv] [--json] [--json-pretty] [--markdown]"
@@ -21,6 +21,12 @@ def gather_parameters(argv: list) -> dict:
     params["json"] = "--json" in argv
     params["json_pretty"] = "--json-pretty" in argv
     params["markdown"] = "--markdown" in argv
+
+    if sum(1 for v in params.values() if v) > 1:
+        print("Only one format can be specified.")
+        return None
+
+    params["default"] = not any(params.values())
 
     return params
 
@@ -68,6 +74,8 @@ def main(parameters: dict[str, bool]) -> None:
                 if x == 0:
                     print(b.markdownHeader())
                 print(b.markdown)
+            case {"default": True}:
+                print(b)
 
 
 if __name__ == "__main__":
