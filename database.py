@@ -1,5 +1,5 @@
 """This module contains the Database class and all its subclasses."""
-
+from __future__ import annotations
 import sqlite3
 from re import Match, match
 
@@ -21,7 +21,7 @@ from constants import (
 class Database:
     """Class handling a generic database."""
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> Database:
         """Create a database object.
 
         Args:
@@ -85,10 +85,13 @@ class Database:
             cols (list): name of the columns to insert into.
             values (list): values to insert.
         """
-        q = f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(str(v) for v in values)})"
+        q = (
+            f"INSERT INTO {table} ({', '.join(cols)}) VALUES "
+            f"({', '.join(str(v) for v in values)})"
+        )
         self._cur.execute(q)
 
-    def applyChanges(self):
+    def commitChanges(self):
         """Apply changes to the database."""
         self._con.commit()
 
@@ -96,7 +99,7 @@ class Database:
 class MK8Deluxe(Database):
     """Class handling the MK8 Deluxe database."""
 
-    def __init__(self):
+    def __init__(self) -> MK8Deluxe:
         """Create a MK8Deluxe object."""
         super().__init__("MK8D")
 
@@ -156,7 +159,7 @@ class MK8Deluxe(Database):
 class MK8DeluxeBuilds(MK8Deluxe):
     """Class handling the MK8Deluxe builds database."""
 
-    def __init__(self):
+    def __init__(self) -> MK8DeluxeBuilds:
         """Create a MK8DeluxeBuilds object."""
         super().__init__()
         self._sql_filter = []  # filter for attributes
@@ -392,7 +395,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         ]
 
     @property
-    def available_sorts(self) -> list[str]:
+    def available_sorts_order(self) -> list[str]:
         """List all the available sorts for the build.
 
         Pass the sort name to the instance of the object to set it.

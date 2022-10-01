@@ -8,9 +8,10 @@ from constants import EntityId, PARTS_ATTRIBUTES, ID_ATTRIBUTES
 
 
 class Entity:
-    """Single entity used in the program. It can be a driver, a vehicle, a tyre or a glider."""
+    """Single entity used in the program. It can be a driver, a vehicle, \
+        a tyre or a glider."""
 
-    def __init__(self, entity_id: EntityId, **kwargs) -> None:
+    def __init__(self, entity_id: EntityId, **kwargs) -> Entity:
         """Initialize the entity.
 
         Args:
@@ -88,7 +89,8 @@ class Entity:
         for i in ID_ATTRIBUTES:
             if self.__getattribute__(i) is None:
                 if other.__getattribute__(i) is not None:
-                    # if the current entity has no id, but the other has, use the other's id
+                    # if the current entity has no id, but the other has,
+                    #   use the other's id
                     kwargs[i] = other.__getattribute__(i)
             else:
                 # otherwise, use the current entity's id
@@ -136,14 +138,18 @@ class Entity:
 
 
 class Part(Entity):
-    def __init__(self, entity_id: EntityId, **kwargs) -> None:
+    """Single part used in the program. It can be a driver, a vehicle, \
+        a tyre or a glider."""
+
+    def __init__(self, entity_id: EntityId, **kwargs) -> Part:
+        """Initialize the part."""
         super().__init__(entity_id, **kwargs)
 
 
 class PartFactory:
     """Factory for the parts."""
 
-    def __init__(self, entity_id: EntityId) -> None:
+    def __init__(self, entity_id: EntityId) -> PartFactory:
         """Build a new part factory.
 
         Args:
@@ -163,16 +169,16 @@ class PartFactory:
 class Build(Entity):
     """Class for a build."""
 
-    def __init__(self, **kwargs: dict) -> None:
+    def __init__(self, **kwargs: dict) -> Build:
         """Initialize the build."""
         super().__init__(entity_id=None, **kwargs)
 
 
 class NamedBuild:
-    """Class for a named build.
+    """Class for a named build. \
     Instead of having ids for the parts, it has the corresponding names."""
 
-    def __init__(self, **kwargs: dict) -> None:
+    def __init__(self, **kwargs: dict) -> NamedBuild:
         """Initialize the named build.
 
         Raises:
@@ -191,7 +197,7 @@ class NamedBuild:
             str
         """
         return f"('score': {self.score}), ('stdev': {self.score_dev}), " + ", ".join(
-            str(a) for a in self.__dict__.items() if not a[0].startswith("_")
+            f"('{k}': {v})" for k, v in self.__dict__.items() if not k.startswith("_")
         )
 
     def toJSON(self, indent=0, sort_keys=False) -> str:
@@ -209,6 +215,52 @@ class NamedBuild:
         json_dict["score_dev"] = self.score_dev
         return dumps(json_dict, indent=indent, sort_keys=sort_keys)
 
+    def csvHeader(self) -> str:
+        """Return the csv header of the named build.
+
+        Returns:
+            str
+        """
+        return "score,score_dev," + ",".join(
+            str(k) for k in self.__dict__.keys() if not k.startswith("_")
+        )
+
+    def markdownHeader(self) -> str:
+        """Return the markdown header of the named build.
+
+        Returns:
+            str
+        """
+        table_len = 3 + len(
+            list(k for k in self.__dict__.keys() if not k.startswith("_"))
+        )
+        return (
+            "| score | score_dev | "
+            + " | ".join(str(k) for k in self.__dict__.keys() if not k.startswith("_"))
+            + " |\n|"
+            + ":---: |" * table_len
+        )
+
+    def toCSV(self) -> str:
+        """Return the CSV representation of the named build.
+
+        Returns:
+            str
+        """
+        return ",".join(
+            str(v) for k, v in self.__dict__.items() if not k.startswith("_")
+        )
+
+    def toMarkdown(self) -> str:
+        """Return the markdown representation of the named build.
+
+        Returns:
+            str
+        """
+        return " | ".join(
+            str(v) for k, v in self.__dict__.items() if not k.startswith("_")
+        )
+
     @property
     def json(self) -> str:
         """Return the JSON representation of the named build.
@@ -217,6 +269,24 @@ class NamedBuild:
             str: JSON representation.
         """
         return self.toJSON(indent=0, sort_keys=True)
+
+    @property
+    def csv(self) -> str:
+        """Return the CSV representation of the named build.
+
+        Returns:
+            str: CSV representation.
+        """
+        return self.toCSV()
+
+    @property
+    def markdown(self) -> str:
+        """Return the markdown representation of the named build.
+
+        Returns:
+            str: Markdown representation.
+        """
+        return self.toMarkdown()
 
     @property
     def score(self) -> float:

@@ -1,4 +1,5 @@
-"""This module contains the code to create the builds and save them to the SQLite database."""
+"""This module contains the code to create the builds and save them \
+    to the SQLite database."""
 from database import Database, MK8Deluxe
 from entities import Entity
 
@@ -42,16 +43,19 @@ def write_to_sql(builds: list[Entity], path: str):
     """
     d = Database(path)
 
+    # empty the old table and create a new one
     d.deleteTable("builds")
     d.createTable("builds", builds[0].cols)
 
+    # insert the new builds
     for b in builds:
         d.insert("builds", b.cols, b.rows)
 
-    d.applyChanges()
+    d.commitChanges()
 
 
 def main():
+    """Run the main function for the create builds script."""
     builds = build()
     write_to_file(builds, "builds.csv")
     write_to_sql(builds, "builds.sql")
