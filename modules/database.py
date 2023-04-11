@@ -78,7 +78,7 @@ class Database:
         try:
             self._cur.execute(q)
         except sqlite3.OperationalError:
-            print(f"Table {table} does not exist")
+            print(f"Cannot delete table {table} because it does not exist.")
 
     def createTable(self, table: str, cols: list, types: list = None, pk: str = None):
         """Create a table in the database.
@@ -293,6 +293,35 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         self._weights[match.group(1)] = value
 
+    def _getNamedBuilds(self) -> list[NamedBuild]:
+        # get all results
+        results = self._queryEntities(EntityId.BUILD)
+
+        for x, r in enumerate(results):
+            names = {}
+            # get names for each part
+            for e in EntityId:
+                # skip the build Entities as they are not named
+                if e == EntityId.BUILD:
+                    continue
+
+                # save all the names for the part
+                names[e.value] = [x for x in self.getNames(e, r.get(f"{e.value}_id"))]
+
+            # save the names in the results
+            results[x].update(names)
+
+            # delete the ids from the results
+            for i in ID_ATTRIBUTES:
+                del results[x][i]
+
+        # create the named builds
+        return [
+            b
+            for b in [NamedBuild(**row, _weights=self._weights) for row in results]
+            if all(f(b) for f in self._data_filter)  # apply data filters
+        ]
+
     def __setattr__(self, __name: str, __value) -> None:
         """Set an attribute of the object.
 
@@ -349,6 +378,29 @@ class MK8DeluxeBuilds(MK8Deluxe):
         )
         return [r[0] for r in self.query(q)]
 
+    def _bnlAlgorithm(self, builds) -> list[Build]:
+        w = set()
+
+        for p in builds:
+            if any(pp.dominate(p) for pp in w):
+                continue
+
+            w -= {pp for pp in w if p.dominate(pp)}
+            w.add(p)
+
+        return list(w)
+
+    def _returnBuilds(self, builds: list[NamedBuild]) -> list[NamedBuild]:
+        # sort the builds by score
+        for f in self._sort[::-1]:
+            builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
+
+        # limit the number of builds
+        if self._limit is not None:
+            builds = builds[: self._limit]
+
+        return builds
+
     @property
     def builds(self) -> list[Build]:
         """Get the builds.
@@ -360,52 +412,28 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return [Build(**row) for row in results]
 
     @property
-    def named_builds(self) -> list[NamedBuild]:
+    def scored_named_builds(self) -> list[NamedBuild]:
         """Get the builds with parts names.
 
         Returns:
             list[NamedBuild]: list of builds with parts names.
         """
-        # get all results
-        results = self._queryEntities(EntityId.BUILD)
-
-        for x, r in enumerate(results):
-            names = {}
-            # get names for each part
-            for e in EntityId:
-                # skip the build Entities as they are not named
-                if e == EntityId.BUILD:
-                    continue
-
-                # save all the names for the part
-                names[e.value] = [x for x in self.getNames(e, r.get(f"{e.value}_id"))]
-
-            # save the names in the results
-            results[x].update(names)
-
-            # delete the ids from the results
-            for i in ID_ATTRIBUTES:
-                del results[x][i]
-
-        # create the named builds
-        builds = [
-            b
-            for b in [NamedBuild(**row, _weights=self._weights) for row in results]
-            if all(f(b) for f in self._data_filter)  # apply data filters
-        ]
-
-        # sort the builds
-        for f in self._sort[::-1]:
-            builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
-
-        # limit the builds
-        if self._limit is not None:
-            builds = builds[: self._limit]
-
-        return builds
+        builds = self._getNamedBuilds()
+        return self._returnBuilds(builds)
 
     @property
-    def available_filters(self) -> list[str]:
+    def dominating_named_builds(self) -> list[NamedBuild]:
+        """Get the dominating builds with parts names.
+
+        Returns:
+            list[NamedBuild]: list of dominating builds with parts names.
+        """
+        builds = self._getNamedBuilds()
+        dominating = self._bnlAlgorithm(builds)
+        return self._returnBuilds(dominating)
+
+    @staticmethod
+    def getAvailableFilters() -> list[str]:
         """List all the available filters for the build.
 
         Pass the filter name to the instance of the object to set it.
@@ -422,6 +450,31 @@ class MK8DeluxeBuilds(MK8Deluxe):
         ]
 
     @property
+    def available_filters(self) -> list[str]:
+        """List all the available filters for the build.
+
+        Pass the filter name to the instance of the object to set it.
+        The attribute accepts a value.
+
+
+        Returns:
+            list[str]
+        """
+        return MK8DeluxeBuilds.getAvailableFilters()
+
+    @staticmethod
+    def getAvailableSortOrders() -> list[str]:
+        """List all the available sorts for the build.
+
+        Pass the sort name to the instance of the object to set it.
+        The attribute accepts a value of 1 for ascending and -1 for descending.
+
+        Returns:
+            list[str]
+        """
+        return [f"sort_{a}" for a in PARTS_ATTRIBUTES + DATA_ATTRIBUTES]
+
+    @property
     def available_sorts_order(self) -> list[str]:
         """List all the available sorts for the build.
 
@@ -431,7 +484,19 @@ class MK8DeluxeBuilds(MK8Deluxe):
         Returns:
             list[str]
         """
-        return [f"sort_{a}" for a in DATA_ATTRIBUTES]
+        return MK8DeluxeBuilds.getAvailableSortOrders()
+
+    @staticmethod
+    def getAvailableWeights() -> list[str]:
+        """List all the available weights for the scoring of the builds.
+
+        Pass the weight name to the instance of the object to set it.
+        The attribute accepts a value of type float.
+
+        Returns:
+            list[str]
+        """
+        return [f"weight_{a}" for a in PARTS_ATTRIBUTES]
 
     @property
     def available_weights(self) -> list[str]:
@@ -443,7 +508,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         Returns:
             list[str]
         """
-        return [f"weight_{a}" for a in PARTS_ATTRIBUTES]
+        return MK8DeluxeBuilds.getAvailableWeights()
 
     @property
     def weights(self) -> dict[str, float]:
