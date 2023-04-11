@@ -45,11 +45,18 @@ def write_to_sql(builds: list[Entity], path: str):
 
     # empty the old table and create a new one
     d.deleteTable("builds")
-    d.createTable("builds", builds[0].cols)
+
+    cols = ["id"]
+    cols.extend(builds[0].cols)
+
+    types = ["INTEGER" for _ in range(len(cols))]
+    d.createTable("builds", cols, types, cols[0])
 
     # insert the new builds
-    for b in builds:
-        d.insert("builds", b.cols, b.rows)
+    for x, b in enumerate(builds):
+        row = [x]
+        row.extend(b.rows)
+        d.insert("builds", cols, row)
 
     d.commitChanges()
 
@@ -58,7 +65,7 @@ def main():
     """Run the main function for the create builds script."""
     builds = build()
     write_to_file(builds, "builds.csv")
-    write_to_sql(builds, "builds.sql")
+    write_to_sql(builds, "MK8D")
 
 
 if __name__ == "__main__":
