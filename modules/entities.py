@@ -220,6 +220,41 @@ class NamedBuild:
             f"('{k}': {v})" for k, v in self.__dict__.items() if not k.startswith("_")
         )
 
+    def __compare__(self, other: NamedBuild) -> tuple[int, int, int]:
+        """Compare the named build to another one.
+
+        Args:
+            other (NamedBuild)
+
+        Returns:
+            tuple[int, int, int]: number of lower, equal and higher attributes.
+        """
+        higher = 0
+        equal = 0
+        lower = 0
+
+        for k in self.__dict__.keys():
+            if k.startswith("_"):
+                continue
+
+            if k == "id" or not isinstance(self.__dict__[k], int):
+                continue
+
+            diff = self.__dict__[k] - other.__dict__[k]
+
+            if diff > 0:
+                higher += 1
+            elif diff < 0:
+                lower += 1
+            else:
+                equal += 1
+
+        return lower, equal, higher
+
+    def dominate(self, other: NamedBuild) -> bool:
+        lower, _, higher = self.__compare__(other)
+        return higher > 0 and lower == 0
+
     def toJSON(self, indent=0, sort_keys=False) -> str:
         """Return the JSON representation of the named build.
 
