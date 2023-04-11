@@ -1,6 +1,9 @@
 import re
 from glob import glob
 
+from modules.database import Database
+import modules.constants as constants
+
 
 def open_file(path: str) -> list:
     with open(path) as f:
@@ -26,14 +29,38 @@ def clean_file(lines: list) -> list:
 
 
 def clean_drivers(lines: list) -> list:
+    def find_number(s: str) -> int:
+        for i, c in enumerate(s):
+            if c.isdigit():
+                return i
+
+        return -1
+
     clean_lines = []
 
-    for x in range(0, len(lines), 2):
-        name = lines[x]
-        stats = re.sub(r"(\w+)(.*)", r"\2", lines[x + 1])
-        new_line = f"{name} {stats}"
-        csv_line = re.sub(r"(\S+)(\s{2,})", r"\1,", new_line)
-        clean_lines.append(csv_line)
+    x = 0
+    while x < len(lines):
+        if "head icon" in lines[x].lower():
+            continue
+
+        first_digit = find_number(lines[x])
+        if first_digit == -1:
+            name = lines[x]
+            fist_stat = find_number(lines[x + 1])
+            stats_line = lines[x + 1][fist_stat:]
+            x += 2
+        else:
+            name = lines[x][:first_digit].strip()
+            stats_line = lines[x][first_digit:]
+            x += 1
+
+        raw_stats = re.findall(r"\d+", stats_line)
+        if len(raw_stats) > 13:
+            stats = ",".join(raw_stats[len(raw_stats) - 13 :])
+        else:
+            stats = ",".join(raw_stats)
+
+        clean_lines.append(f"{name},{stats}")
 
     return clean_lines
 
@@ -54,18 +81,17 @@ def merge_lines(lines: list) -> list:
         else:
             merged[stats] = [name]
 
-    ids = []
+    ids = ["name,id"]
     merged_lines = []
     current_id = 0
     for stats, names in merged.items():
-        current_id += 1
         merged_lines.append(f"{current_id},{stats}")
-
         for name in names:
             ids.append(f"{name},{current_id}")
+        current_id += 1
 
     merged_lines.sort()
-    new_header = f"id, {','.join(lines[0].split(',')[1:])}"
+    new_header = f"id,{','.join(lines[0].split(',')[1:])}"
     merged_lines.insert(0, new_header)
 
     return merged_lines, ids
@@ -89,6 +115,25 @@ def create_path(path: str, folder: str, suffix: str = None) -> str:
     return f"{'/'.join(folders[:-1])}/{folder}/{filename.split('.')[0]}.csv"
 
 
+def add_to_database(lines: list, table: str) -> None:
+    d = Database("MK8D")
+    # if the table exists, delete it
+    if d.tableExists(table):
+        d.deleteTable(table)
+
+    # create the table
+    cols = [constants.CSV_ATTRIBUTES[x] for x in lines[0].split(",")]
+    types = ["STRING" if x == "name" else "INTEGER" for x in cols]
+    d.createTable(table, cols, types)
+
+    # add the data
+    for line in lines[1:]:
+        values = [x.strip() for x in line.split(",")]
+        d.insert(table, cols, values)
+
+    d.commitChanges()
+
+
 def clean(path: str) -> str:
     lines = open_file(path)
     clean_lines = []
@@ -110,6 +155,10 @@ def clean(path: str) -> str:
     write_file(merged_path, merged)
     ids_path = create_path(path, "merged", "names")
     write_file(ids_path, ids)
+
+    filename = path.split("/")[-1].split(".")[0]
+    add_to_database(merged, filename)
+    add_to_database(ids, f"{filename}_names")
 
     return out_path
 
