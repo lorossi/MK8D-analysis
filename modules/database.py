@@ -1,20 +1,21 @@
 """This module contains the Database class and all its subclasses."""
 from __future__ import annotations
+
 import sqlite3
 from re import Match, match
 
-from entities import (
-    Entity,
-    NamedBuild,
-    Build,
-    PartFactory,
-)
 from constants import (
-    EntityId,
+    DATA_ATTRIBUTES,
+    ID_ATTRIBUTES,
     PARTS_ATTRIBUTES,
     TABLE_NAMES,
-    ID_ATTRIBUTES,
-    DATA_ATTRIBUTES,
+    EntityId,
+)
+from entities import (
+    Build,
+    Entity,
+    NamedBuild,
+    PartFactory,
 )
 
 
