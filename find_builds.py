@@ -45,7 +45,8 @@ def find(parameters: argparse.Namespace) -> None:
             setattr(m, key, value)
 
     if parameters.query_weights is not None:
-        m.weights = parameters.query_weights
+        for key, value in parameters.query_weights.items():
+            setattr(m, key, value)
 
     # use m.limit to set the maximum number of results to return
     m.limit = parameters.limit
@@ -81,7 +82,7 @@ def main():
         description="Find builds with the specified parameters.",
     )
 
-    # parser group for listing available filters and sorters
+    # parser group for listing available filters and sort orders
     list_parser = parser.add_mutually_exclusive_group(required=False)
     list_parser.add_argument(
         "--list-filters",
@@ -92,7 +93,7 @@ def main():
     list_parser.add_argument(
         "--list-sort-orders",
         action="store_true",
-        help="List the available sorters.",
+        help="List the available sort orders.",
     )
 
     list_parser.add_argument(
@@ -156,7 +157,7 @@ def main():
     parameters_parser.add_argument(
         "--limit",
         type=int,
-        default=5,
+        required=True,
         help="Limit the number of results to return.",
     )
 
@@ -164,15 +165,15 @@ def main():
         "--query-filters",
         dest="query_filters",
         nargs="+",
-        help="Query filters to apply to the query.",
+        help="Filters to apply to the query.",
         action=FilterParser,
     )
 
     parameters_parser.add_argument(
-        "--query-sorters",
+        "--query-sort",
         dest="query_sort",
         nargs="+",
-        help="Query sorters to apply to the query.",
+        help="Sorting order to apply to the query.",
         action=SortParser,
     )
 
@@ -180,7 +181,7 @@ def main():
         "--query-weights",
         dest="query_weights",
         nargs="+",
-        help="Query weights to apply to the query.",
+        help="Weights to apply to the query.",
         action=WeightParser,
     )
 
