@@ -4,14 +4,14 @@ from __future__ import annotations
 import sqlite3
 from re import Match, match
 
-from constants import (
+from .constants import (
     DATA_ATTRIBUTES,
     ID_ATTRIBUTES,
     PARTS_ATTRIBUTES,
     TABLE_NAMES,
     EntityId,
 )
-from entities import (
+from .entities import (
     Build,
     Entity,
     NamedBuild,
@@ -56,6 +56,18 @@ class Database:
         self._cur.execute(q)
         return [i[0] for i in self._cur.description]
 
+    def tableExists(self, table: str) -> bool:
+        """Check if a table exists in the database.
+
+        Args:
+            table (str): Name of the table to check.
+
+        Returns:
+            bool: True if the table exists, False otherwise.
+        """
+        q = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'"
+        return bool(self.query(q))
+
     def deleteTable(self, table: str):
         """Delete (drop) a table from the database.
 
@@ -68,14 +80,22 @@ class Database:
         except sqlite3.OperationalError:
             print(f"Table {table} does not exist")
 
-    def createTable(self, table: str, cols: list):
+    def createTable(self, table: str, cols: list, types: list = None, pk: str = None):
         """Create a table in the database.
 
         Args:
             table (str): name of the table to create.
             cols (list): list of columns to create.
         """
-        q = f"CREATE TABLE {table} ({', '.join(cols)})"
+        if types is None:
+            types = ["STRING"] * len(cols)
+
+        if pk is None:
+            pk = cols[0]
+
+        cols_typed = [f"{c} {t}" for c, t in zip(cols, types)]
+
+        q = f"CREATE TABLE {table} ({', '.join(cols_typed)}, PRIMARY KEY ({pk}))"
         self._cur.execute(q)
 
     def insert(self, table: str, cols: list, values: list):
@@ -86,10 +106,16 @@ class Database:
             cols (list): name of the columns to insert into.
             values (list): values to insert.
         """
-        q = (
-            f"INSERT INTO {table} ({', '.join(cols)}) VALUES "
-            f"({', '.join(str(v) for v in values)})"
-        )
+        q = f"INSERT INTO {table} ({', '.join(cols)}) VALUES ("
+
+        for v in values:
+            if isinstance(v, str):
+                q += f"'{v}',"
+            else:
+                q += f"{v},"
+
+        q = q[:-1] + ")"
+
         self._cur.execute(q)
 
     def commitChanges(self):
