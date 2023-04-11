@@ -108,7 +108,7 @@ def clean(path: str) -> str:
     merged, ids = merge_lines(clean_lines)
     merged_path = create_path(path, "merged")
     write_file(merged_path, merged)
-    ids_path = create_path(path, "merged", "ids")
+    ids_path = create_path(path, "merged", "names")
     write_file(ids_path, ids)
 
     return out_path
