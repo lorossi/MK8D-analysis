@@ -68,6 +68,8 @@ def find(parameters: argparse.Namespace) -> None:
         BuildsPrinter.printJSONPretty(builds)
     elif parameters.markdown:
         BuildsPrinter.printMarkdown(builds)
+    elif parameters.toml:
+        BuildsPrinter.printTOML(builds)
     else:
         for x, b in enumerate(builds):
             print(f"{x}: {b}")
@@ -126,6 +128,12 @@ def main():
         "--markdown",
         action="store_true",
         help="Print the builds in Markdown format.",
+    )
+
+    output_parser.add_argument(
+        "--toml",
+        action="store_true",
+        help="Print the builds in TOML format.",
     )
 
     # parser group for query algorithm

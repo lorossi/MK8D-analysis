@@ -344,6 +344,15 @@ class NamedBuild:
         return self.toMarkdown()
 
     @property
+    def TOML(self) -> str:
+        """Return the TOML representation of the named build.
+
+        Returns:
+            str: TOML representation.
+        """
+        return self.toTOML()
+
+    @property
     def score(self) -> float:
         """Return the score of the named build.
 

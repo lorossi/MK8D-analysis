@@ -1,4 +1,3 @@
-from ujson import dumps
 from .entities import NamedBuild
 
 
@@ -12,13 +11,11 @@ class BuildsPrinter:
 
     @classmethod
     def printJSON(cls, named_builds: list[NamedBuild]) -> str:
-        json_dict = [b.json for b in named_builds]
-        print(dumps(json_dict))
+        print(f"[{', '.join([b.json for b in named_builds])}")
 
     @classmethod
     def printJSONPretty(cls, named_builds: list[NamedBuild]) -> str:
-        json_dict = [b.json for b in named_builds]
-        print(dumps(json_dict, indent=4))
+        print(f"[{', '.join([b.toJSON(indent=2) for b in named_builds])}")
 
     @classmethod
     def printMarkdown(cls, named_builds: list[NamedBuild]) -> str:
@@ -34,4 +31,5 @@ class BuildsPrinter:
             "json": cls.printJSON,
             "json-pretty": cls.printJSONPretty,
             "markdown": cls.printMarkdown,
+            "toml": cls.printTOML,
         }
