@@ -4,7 +4,7 @@ as they are saved in the database.
 The class offers the ability to sort, filter and score each of them.
 """
 from sys import argv
-from database import MK8DeluxeBuilds
+from modules.database import MK8DeluxeBuilds
 
 
 def gather_parameters(argv: list) -> dict:

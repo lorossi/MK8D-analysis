@@ -1,7 +1,7 @@
 """This module contains the code to create the builds and save them \
     to the SQLite database."""
-from database import Database, MK8Deluxe
-from entities import Entity
+from modules.database import Database, MK8Deluxe
+from modules.entities import Entity
 
 
 def build() -> list[Entity]:
