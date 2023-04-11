@@ -1,15 +1,16 @@
-Super Glider,1
-Waddle Wing,1
-Hylian Kite,1
-Cloud Glider,2
-Parachute,2
-Flower Glider,2
-Paper Glider,2
-Wario Wing,3
-Plane Glider,3
-Gold Glider,3
-Paraglider,3
-Peach Parasol,4
-Parafoil,4
-Bowser Kite,4
-MKTV Parafoil,4
+name,id
+Super Glider,0
+Waddle Wing,0
+Hylian Kite,0
+Cloud Glider,1
+Parachute,1
+Flower Glider,1
+Paper Glider,1
+Wario Wing,2
+Plane Glider,2
+Gold Glider,2
+Paraglider,2
+Peach Parasol,3
+Parafoil,3
+Bowser Kite,3
+MKTV Parafoil,3

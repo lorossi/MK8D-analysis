@@ -1,45 +1,46 @@
-Mario,1
-Ludwig,1
-Luigi,2
-Iggy,2
-Peach,3
-Daisy,3
-Yoshi,4
-Birdo,4
+name,id
+Baby Peach,0
+Baby Daisy,0
+Baby Rosalina,1
+Lemmy,1
+Baby Mario,2
+Baby Luigi,2
+Dry Bones,2
+Toadette,3
+Wendy,3
+Isabelle,3
+Koopa Troopa,4
+Lakitu,4
+Bowser Jr.,4
 Toad,5
+Shy Guy,5
 Larry,5
-Toadette,6
-Wendy,6
-Isabelle,6
-Koopa Troopa,7
-Lakitu,7
-Bowser Jr.,7
-Bowser,8
-Donkey Kong,9
-Waluigi,9
-Roy,9
-Wario,10
-Dry Bowser,10
+Cat Peach,6
+Villager (female),6
+Inkling Girl,6
+Peach,7
+Daisy,7
+Yoshi,7
+Birdo,7
+Tanooki Mario,8
+Villager (male),8
+Inkling Boy,8
+Mario,9
+Ludwig,9
+Mii (medium),9
+Luigi,10
+Iggy,10
 Rosalina,11
 Link,11
 King Boo,11
-Link,11
-Metal Mario,12
-Pink Gold Peach,12
-Gold Mario,12
-Shy Guy,13
-Baby Mario,14
-Baby Luigi,15
-Dry Bones,15
-Baby Peach,16
-Baby Daisy,16
-Baby Rosalina,17
-Lemmy,17
-Morton,18
-Mii (medium),19
-Tanooki Mario,20
-Villager (male),20
-Cat Peach,21
-Villager (female),21
-Inkling Girl,22
-Inkling Boy,23
+Link (Breath of the Wild),11
+Donkey Kong,12
+Waluigi,12
+Roy,12
+Wario,13
+Dry Bowser,13
+Bowser,14
+Morton,14
+Metal Mario,15
+Pink Gold Peach,15
+Gold Mario,15
