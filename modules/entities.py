@@ -1,10 +1,11 @@
 """This module contains the classes for the entities in the program."""
 
 from __future__ import annotations
-from ujson import dumps
+
 from statistics import stdev
 
-from constants import EntityId, PARTS_ATTRIBUTES, ID_ATTRIBUTES
+from constants import ID_ATTRIBUTES, PARTS_ATTRIBUTES, EntityId
+from ujson import dumps
 
 
 class Entity:
@@ -63,6 +64,24 @@ class Entity:
 
         kwargs = self._addAttributes(other)
         return Build(**kwargs)
+
+    def __eq__(self, other: any) -> bool:
+        """Dunder method for the equality of two entities.
+
+        Args:
+            other (any): The other entity.
+
+        Returns:
+            bool: True if the entities are equal, False otherwise.
+        """
+        if other.__class__.__name__ == self.__class__.__name__:
+            return False
+
+        for v in PARTS_ATTRIBUTES:
+            if self.__getattribute__(v) != other.__getattribute__(v):
+                return False
+
+        return True
 
     def _addAttributes(self, other: Entity) -> dict[str, int | str]:
         """Add the attributes of the other entity to the current entity.
