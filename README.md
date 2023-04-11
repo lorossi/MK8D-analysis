@@ -1,5 +1,7 @@
 # MK8D-analysis
 
+Query: python3 find_builds.py --dominating --limit 10  --markdown --query-filters min_ground_speed=10 min_acceleration=10 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 sort_ground_handling=-1
+
 I have been playing the new Mario Kart on the Nintendo Switch for about a year.
 The peculiarity of this game, a new feature introduced in this iteration, is the high level of customization of the karts and the bikes.
 Before playing a Grand Prix, either locally or online, the player must choose:
@@ -24,8 +26,18 @@ For example, the characters *Waluigi*, *Donkey Kong* and *Roy Koopa* all share t
 To reduce the size of the database *(and somehow make the data more manageable)*, I grouped the entities that share the same stats, by giving them a shared id.
 One more table, linking the entity id to their relative names, was needed.
 
-I originally downloaded all the data *(via copy-pasting)* into `csv` files, where I cleaned them.
-To make the data more accessible and easy to manipulate, I created a `sqlite` database and imported the data into it.
+### Cleaning the data
+
+The data (found as `.csv` files in the `data/dirty` folder) cannot be handled as-is by the program.
+
+So this is where the `clean_files.py` comes in. It:
+
+1. Loads all the files in the `data/dirty` folder
+2. Cleans the rows, removing redundant lines and superfluous details
+3. Merges the duplicated rows, by assigning them the same id
+4. Saves the output data in both `csv` and `sqlite` format
+
+This is where the `MK8D` sqlite database is created.
 
 I chose to use `sqlite` because it allows one to easily query the data via `SQL`; while not being a language that I particularly like, I figured out that it would have made my life easier in this case.
 The other option was to use a no-SQL database, like `MongoDB`, but I figured that making queries would be more difficult.
@@ -88,22 +100,7 @@ So I tweaked the weights and the filters, finally setting:
 
 The top 5 builds, sorted by *score* and the *standard deviation* of the stats, are the following:
 
-| score | score_dev | ground_speed | water_speed | air_speed | antigravity_speed | acceleration | weight | ground_handling | water_handling | air_handling | antigravity_handling |             traction              |                       miniturbo                       |           driver           |                            vehicle                             | tyre  | glider |
-| :---: | :-------: | :----------: | :---------: | :-------: | :---------------: | :----------: | :----: | :-------------: | :------------: | :----------: | :------------------: | :-------------------------------: | :---------------------------------------------------: | :------------------------: | :------------------------------------------------------------: | :---: | :----: |
-|  12   |    16     |      16      |     13      |    13     |        10         |      10      |   8    |       11        |       10       |      8       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] |   ['Standard Kart', '300 SL Roadster', 'The Duke']    | ['Roller', 'Azure Roller'] | ['Cloud Glider', 'Parachute', 'Flower Glider', 'Paper Glider'] |
-|  12   |    15     |      16      |     13      |    13     |        11         |      10      |   9    |       11        |       9        |      7       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] |   ['Standard Kart', '300 SL Roadster', 'The Duke']    | ['Roller', 'Azure Roller'] | ['Peach Parasol', 'Parafoil', 'Bowser Kite', 'MKTV Parafoil']  |
-|  12   |    15     |      14      |     12      |    13     |        10         |      11      |   9    |        7        |       11       |      8       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] |       ['Pipe Frame', 'Varmint', 'City Tripper']       |  ['Button', 'Leaf Tires']  |         ['Super Glider', 'Waddle Wing', 'Hylian Kite']         |
-|  12   |    14     |      14      |     13      |    13     |        11         |      11      |   10   |        7        |       10       |      7       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] |       ['Pipe Frame', 'Varmint', 'City Tripper']       |  ['Button', 'Leaf Tires']  |  ['Wario Wing', 'Plane Glider', 'Gold Glider', 'Paraglider']   |
-|  12   |    15     |      18      |     12      |    13     |        11         |      11      |   8    |       11        |       10       |      8       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] | ['Cat Cruiser', 'Comet', 'Yoshi Bike', 'Teddy Buggy'] | ['Roller', 'Azure Roller'] |         ['Super Glider', 'Waddle Wing', 'Hylian Kite']         |
 
-They all share the same score, with slightly varying standard deviation; the best build, according to these parameters, is then the following:
-
-- Driver: *Waluigi, Donkey Kong, Roy*
-- Kart: *Standard Kart, 300 SL Roadster, The Duke*
-- Tyre: *Roller, Azure Roller*
-- Glider: *Cloud Glider, Parachute, Flower Glider, Paper Glider*
-
-in any combination.
 
 I played a lot with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
@@ -121,7 +118,10 @@ A database containing the builds will be created in the main folder of the scrip
 - `--json` and `--json-pretty` to output the builds in a json format
 - `--markdown` to output the builds in a markdown table format
 
-As of now, the only way to tweak the parameters and influence the build is to edit the code.
+- TODO add the description of the commands
+- TODO add some examples
+- TODO add the explanation of the BNL algorithm
+
 The minimum and maximum values, the sort order, the weights and the number of builds to be shown can be passed as attributes to the `MK8DeluxeBuilds` class.
 A list of available filters, sort orders, and weights can be found respectively in the `available_filters`, `available_sort_orders` and `available_weights` attributes of the `MK8DeluxeBuilds` class.
 
