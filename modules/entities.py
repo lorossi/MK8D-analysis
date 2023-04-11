@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from statistics import stdev
 
-from constants import ID_ATTRIBUTES, PARTS_ATTRIBUTES, EntityId
 from ujson import dumps
+
+from .constants import ID_ATTRIBUTES, PARTS_ATTRIBUTES, EntityId
 
 
 class Entity:
