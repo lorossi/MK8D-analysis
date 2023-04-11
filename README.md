@@ -9,27 +9,25 @@ Before playing a Grand Prix, either locally or online, the player must choose:
 - The **tyres**
 - The **glider**
 
-each of them having 6 visible stats *(ground speed, acceleration, weight, handling, traction, miniturbo)* and 6 more hidden stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling)*.
+each of them with 6 visible stats *(ground speed, acceleration, weight, handling, traction, mini turbo)* and 6 more hidden stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling)*.
 
-The question that soon arised was: how do I a choose a setup (character, kart, tyres, glider) that is the best?
+The question that soon arose was: how do I choose a setup (character, kart, tyres, glider) that is the best?
 *It is possible to finally defeat the superior Japanese players in the 200cc category?*
 
 ## The data
 
 All the data has been gathered from the [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe).
 
-I soon found that that not each entity is unique;
+I soon found that not each entity is unique;
 up to 4 karts, characters, tyres and gliders can share the same stats.
-
-For example the characters *Waluigi*, *Donkey Kong* and *Roy Koopa* all share the same stats; the same goes for the karts *Streetle* and the *Landship*.
-
-In order to reduce the size of the database *(and somehow make the data more manageable)*, I grouped the entities that share the same stats together, by giving them a shared id.
+For example, the characters *Waluigi*, *Donkey Kong* and *Roy Koopa* all share the same stats; the same goes for the karts *Streetle* and the *Landship*.
+To reduce the size of the database *(and somehow make the data more manageable)*, I grouped the entities that share the same stats, by giving them a shared id.
 One more table, linking the entity id to their relative names, was needed.
 
 I originally downloaded all the data *(via copy-pasting)* into `csv` files, where I cleaned them.
-In order to make the data more accessible and easy to manipulate, I created a `sqlite` database and imported the data into it.
+To make the data more accessible and easy to manipulate, I created a `sqlite` database and imported the data into it.
 
-I chose to use `sqlite` because it allows to easily query the data via `SQL`; while not being a language that I particularly like, I figured out that it would have made my life easier in this case.
+I chose to use `sqlite` because it allows one to easily query the data via `SQL`; while not being a language that I particularly like, I figured out that it would have made my life easier in this case.
 The other option was to use a no-SQL database, like `MongoDB`, but I figured that making queries would be more difficult.
 
 ## The analysis
@@ -48,17 +46,16 @@ I quickly discarded `dataclasses`, as they are not meant to be used as container
 The script `create_builds.py` loads all the entities from the database via the `MK8Deluxe` class, a wrapper around the `sqlite3` module.
 Via the aforementioned dunder methods, the single entities loaded are then added together, creating an instance of the `Build` class.
 
-The builds are then saved into another `sqlite` database and inside a (pretty big) `csv` file in order to be used later.
+The builds are then saved into another `sqlite` database and inside a (pretty big) `csv` file to be used later.
 
 ### Find builds
 
 The script `find_builds.py` loads all the created builds in the previous step and filters them according to the user's needs, thanks to the `MK8DeluxeBuilds` class.
-
-In order to do so, the script:
+To do so, the script:
 
 - Accepts a minimum and maximum value for each stat
-- Orders the builds in a order according to the user's needs
-- Computes a score for each build, according on some custom weights
+- Orders the builds in an order according to the user's needs
+- Computes a score for each build, according to some custom weights
 - Limits the number of builds to be shown
 
 All of these manipulations are done via dunder methods, which makes the code very readable *(I hope)* as it reduces the overall verbosity and makes the code more compact.
@@ -76,7 +73,7 @@ Some would prefer acceleration over velocity, others would prefer handling over 
 After playing for a long while, I found out that:
 
 - Miniturbo is a really important stat, as I get a lot of them due to my continuous drifting
-- Acceleration is more important than speed, as online lobbies make an aggressive use of items
+- Acceleration is more important than speed, as online lobbies make aggressive use of items
 - Handling and traction are pretty important, but not as much as the other stats
 - The best build is the one that has balanced stats
 
@@ -99,8 +96,7 @@ The top 5 builds, sorted by *score* and the *standard deviation* of the stats, a
 |  12   |    14     |      14      |     13      |    13     |        11         |      11      |   10   |        7        |       10       |      7       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] |       ['Pipe Frame', 'Varmint', 'City Tripper']       |  ['Button', 'Leaf Tires']  |  ['Wario Wing', 'Plane Glider', 'Gold Glider', 'Paraglider']   |
 |  12   |    15     |      18      |     12      |    13     |        11         |      11      |   8    |       11        |       10       |      8       |          13          | ['Waluigi', 'Donkey Kong', 'Roy'] | ['Cat Cruiser', 'Comet', 'Yoshi Bike', 'Teddy Buggy'] | ['Roller', 'Azure Roller'] |         ['Super Glider', 'Waddle Wing', 'Hylian Kite']         |
 
-They all share the same score, with slightly varying standard deviation;
-then best build, according to these parameter, is then the following:
+They all share the same score, with slightly varying standard deviation; the best build, according to these parameters, is then the following:
 
 - Driver: *Waluigi, Donkey Kong, Roy*
 - Kart: *Standard Kart, 300 SL Roadster, The Duke*
@@ -111,7 +107,7 @@ in any combination.
 
 I played a lot with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
-Due to the high score in drifting, I recommend to drift *EVERYWHERE*, even on straight lines, as it will help you to get a good speed up.
+Due to the high score in drifting, I recommend drifting *EVERYWHERE*, even on straight lines, as it will help you to get a good speed up.
 
 ## The code
 
@@ -125,7 +121,7 @@ A database containing the builds will be created in the main folder of the scrip
 - `--json` and `--json-pretty` to output the builds in a json format
 - `--markdown` to output the builds in a markdown table format
 
-As now, the only way to tweak the parameters and influence the build is to edit the code.
+As of now, the only way to tweak the parameters and influence the build is to edit the code.
 The minimum and maximum values, the sort order, the weights and the number of builds to be shown can be passed as attributes to the `MK8DeluxeBuilds` class.
 A list of available filters, sort orders, and weights can be found respectively in the `available_filters`, `available_sort_orders` and `available_weights` attributes of the `MK8DeluxeBuilds` class.
 
@@ -136,7 +132,7 @@ In the foreseeable future, I plan to add:
 - Tests *(I know, I know)*
 - A simple web interface, to make the data more accessible to everyone
 - Some way of automating the process of finding the best builds
-  - if only Nintendo shared some stats about the multiplayer way, I could find a way to auto generate the weights...
+  - if only Nintendo shared some stats about the multiplayer way, I could find a way to auto-generate the weights...
 
 ## Credits
 
