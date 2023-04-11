@@ -216,8 +216,10 @@ class NamedBuild:
         Returns:
             str
         """
-        return f"('score': {self.score}), ('stdev': {self.score_dev}), " + ", ".join(
-            f"('{k}': {v})" for k, v in self.__dict__.items() if not k.startswith("_")
+        return (
+            f"{self.__class__.__name__}("
+            + ", ".join(f"{k}={v}" for k, v in self.attributes.items())
+            + ")"
         )
 
     def __compare__(self, other: NamedBuild) -> tuple[int, int, int]:
@@ -265,10 +267,7 @@ class NamedBuild:
         Returns:
             str
         """
-        json_dict = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
-        json_dict["score"] = self.score
-        json_dict["score_dev"] = self.score_dev
-        return dumps(json_dict, indent=indent, sort_keys=sort_keys)
+        return dumps(self.attributes, indent=indent, sort_keys=sort_keys)
 
     def csvHeader(self) -> str:
         """Return the csv header of the named build.
@@ -276,9 +275,7 @@ class NamedBuild:
         Returns:
             str
         """
-        return "score,score_dev," + ",".join(
-            str(k) for k in self.__dict__.keys() if not k.startswith("_")
-        )
+        return ",".join(k for k in self.attributes.keys())
 
     def markdownHeader(self) -> str:
         """Return the markdown header of the named build.
@@ -286,15 +283,12 @@ class NamedBuild:
         Returns:
             str
         """
-        table_len = 3 + len(
-            list(k for k in self.__dict__.keys() if not k.startswith("_"))
-        )
         return (
-            "| score | score_dev | "
-            + " | ".join(str(k) for k in self.__dict__.keys() if not k.startswith("_"))
-            + " |\n|"
-            + ":---: |" * table_len
-        )
+            "|"
+            + "|".join(k for k in self.attributes.keys())
+            + " |\n"
+            + "|:---:" * len(self.attributes.keys())
+        ) + "|"
 
     def toCSV(self) -> str:
         """Return the CSV representation of the named build.
@@ -302,9 +296,7 @@ class NamedBuild:
         Returns:
             str
         """
-        return ",".join(
-            str(v) for k, v in self.__dict__.items() if not k.startswith("_")
-        )
+        return ",".join(str(v) for v in self.attributes.values())
 
     def toMarkdown(self) -> str:
         """Return the markdown representation of the named build.
@@ -312,9 +304,38 @@ class NamedBuild:
         Returns:
             str
         """
-        return " | ".join(
-            str(v) for k, v in self.__dict__.items() if not k.startswith("_")
-        )
+
+        def format_val(v: float | int | list[str]) -> str:
+            if isinstance(v, list):
+                return ", ".join(v)
+
+            if isinstance(v, float):
+                if v == 0.0:
+                    return "N/A"
+                return f"{v:.2f}"
+
+            if isinstance(v, int):
+                if v == 0:
+                    return "N/A"
+                return f"{v}"
+
+            return str(v)
+
+        return "| " + " | ".join(format_val(v) for v in self.attributes.values()) + " |"
+
+        return
+
+    @property
+    def attributes(self) -> dict[str, float | int | list[str]]:
+        """Return the attributes of the named build.
+
+        Returns:
+            dict[str, float | int | list[str]]: Attributes.
+        """
+        attrs = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+        attrs["score"] = self.score
+        attrs["score_dev"] = self.score_dev
+        return attrs
 
     @property
     def json(self) -> str:
@@ -359,6 +380,9 @@ class NamedBuild:
         Returns:
             float
         """
+        if sum(self._weights.values()) == 0:
+            return 0
+
         items = set(self.__dict__.keys()) & set(PARTS_ATTRIBUTES)
         return sum(self._weights[v] * self.__getattribute__(v) for v in list(items))
 
@@ -371,6 +395,9 @@ class NamedBuild:
         Returns:
             float
         """
+        if sum(self._weights.values()) == 0:
+            return 0
+
         return stdev(
             [
                 self.__dict__[k] * self._weights[k]

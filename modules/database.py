@@ -196,8 +196,6 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         # weights of the attributes for the score calculation
         self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
-        self._weights["ground_speed"] = 0.5
-        self._weights["acceleration"] = 0.5
 
     def _buildQuery(self, *_) -> str:
         """Build a query to get the data from the database.

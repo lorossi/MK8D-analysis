@@ -41,7 +41,12 @@ class FilterParser(CommandParser):
         )
 
     def validateValue(self, value: str) -> bool:
-        return value.isnumeric()
+        try:
+            int(value)
+        except ValueError:
+            return False
+
+        return True
 
     def validateKey(self, key: str) -> bool:
         return key in MK8DeluxeBuilds.getAvailableFilters()
@@ -67,7 +72,12 @@ class WeightParser(CommandParser):
         )
 
     def validateValue(self, value: str) -> bool:
-        return value.isnumeric()
+        try:
+            float(value)
+        except ValueError:
+            return False
+
+        return True
 
     def validateKey(self, key: str) -> bool:
         return key in MK8DeluxeBuilds.getAvailableWeights()
