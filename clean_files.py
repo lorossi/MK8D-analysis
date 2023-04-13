@@ -1,11 +1,21 @@
+"""This script cleans the files in the dirty folder and outputs them \
+    to the clean folder, creating a sql database in the process."""
 import re
 from glob import glob
 
-from modules.database import Database
 import modules.constants as constants
+from modules.database import Database
 
 
-def open_file(path: str) -> list:
+def open_file(path: str) -> list[str]:
+    """Open a file and return a list of lines.
+
+    Args:
+        path (str): path to the file
+
+    Returns:
+        list[str]: list of lines
+    """
     with open(path) as f:
         lines = [
             line.strip()
@@ -16,7 +26,15 @@ def open_file(path: str) -> list:
     return lines
 
 
-def clean_file(lines: list) -> list:
+def clean_file(lines: list) -> list[str]:
+    """Clean the lines of the file.
+
+    Args:
+        lines (list[str]): list of lines
+
+    Returns:
+        list[str]: list of cleaned lines
+    """
     clean_lines = []
 
     lines = [line for line in lines if "Mario Kart 8" not in line]
@@ -28,7 +46,16 @@ def clean_file(lines: list) -> list:
     return clean_lines
 
 
-def clean_drivers(lines: list) -> list:
+def clean_drivers(lines: list) -> list[str]:
+    """Clean the lines of the drivers file.
+
+    Args:
+        lines (list)
+
+    Returns:
+        list[str]
+    """
+
     def find_number(s: str) -> int:
         for i, c in enumerate(s):
             if c.isdigit():
@@ -65,12 +92,28 @@ def clean_drivers(lines: list) -> list:
     return clean_lines
 
 
-def extract_stats(line: str) -> tuple:
+def extract_stats(line: str) -> tuple[str, ...]:
+    """Extract the stats from a line.
+
+    Args:
+        line (str)
+
+    Returns:
+        tuple[str, ...]
+    """
     name, *stats = line.split(",")
     return name, ",".join(stats)
 
 
-def merge_lines(lines: list) -> list:
+def merge_lines(lines: list[str]) -> tuple[list[str], list[str]]:
+    """Merge the lines with the same stats.
+
+    Args:
+        lines (list[str])
+
+    Returns:
+        list[str], list[str]: merged lines, ids
+    """
     merged = dict()
 
     for line in lines[1:]:
@@ -97,13 +140,32 @@ def merge_lines(lines: list) -> list:
     return merged_lines, ids
 
 
-def write_file(path: str, lines: list) -> None:
+def write_file(path: str, lines: list[str]) -> None:
+    """Write the lines to a file.
+
+    Args:
+        path (str): path to the file
+        lines (list[str]): list of lines
+
+    Returns:
+        None
+    """
     with open(path, "w") as f:
         for line in lines:
             f.write(line + "\n")
 
 
 def create_path(path: str, folder: str, suffix: str = None) -> str:
+    """Create a path to a file.
+
+    Args:
+        path (str): path to the file
+        folder (str): folder to put the file in
+        suffix (str, optional): suffix to add to the file name. Defaults to None.
+
+    Returns:
+        str: path to the file
+    """
     folders = path.split("/")[:-1]
     filename = path.split("/")[-1]
 
@@ -115,7 +177,16 @@ def create_path(path: str, folder: str, suffix: str = None) -> str:
     return f"{'/'.join(folders[:-1])}/{folder}/{filename.split('.')[0]}.csv"
 
 
-def add_to_database(lines: list, table: str) -> None:
+def add_to_database(lines: list[str], table: str) -> None:
+    """Add the lines to the database.
+
+    Args:
+        lines[str] (list)
+        table (str)
+
+    Returns:
+        None
+    """
     d = Database("MK8D")
     # if the table exists, delete it
     if d.tableExists(table):
@@ -135,6 +206,14 @@ def add_to_database(lines: list, table: str) -> None:
 
 
 def clean(path: str) -> str:
+    """Clean the file.
+
+    Args:
+        path (str): path to the file
+
+    Returns:
+        str: path to the cleaned file
+    """
     lines = open_file(path)
     clean_lines = []
 
@@ -164,6 +243,7 @@ def clean(path: str) -> str:
 
 
 def main() -> None:
+    """Clean all the files in the dirty folder."""
     dirty_path = "data/dirty/*.csv"
     for path in glob(dirty_path):
         clean(path)
