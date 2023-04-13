@@ -81,3 +81,16 @@ class WeightParser(CommandParser):
 
     def validateKey(self, key: str) -> bool:
         return key in MK8DeluxeBuilds.getAvailableWeights()
+
+
+class AttributesParser(CommandParser):
+    def __call__(self, *args: Any):
+        super().__call__(
+            *args,
+        )
+
+    def validateValue(self, value: str) -> bool:
+        return value in ["1", "0"]
+
+    def validateKey(self, key: str) -> bool:
+        return key in MK8DeluxeBuilds.getAvailableDominants()
