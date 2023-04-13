@@ -5,20 +5,18 @@ The class offers the ability to sort, filter and score each of them.
 """
 import argparse
 
-
-from modules.database import MK8DeluxeBuilds
 from modules.builds_printer import BuildsPrinter
 from modules.command_parsers import (
+    AttributesParser,
     FilterParser,
     SortParser,
     WeightParser,
-    AttributesParser,
 )
+from modules.database import MK8DeluxeBuilds
 
 
 def find(parameters: argparse.Namespace) -> None:
     """Run the main function for the create named builds script."""
-
     if parameters.list_filters:
         print(MK8DeluxeBuilds.getAvailableFilters())
         return
@@ -46,8 +44,8 @@ def find(parameters: argparse.Namespace) -> None:
         for key, value in parameters.query_weights.items():
             setattr(m, key, value)
 
-    if parameters.rank_attributes is not None:
-        for key, value in parameters.rank_attributes.items():
+    if parameters.ranking_attributes is not None:
+        for key, value in parameters.ranking_attributes.items():
             setattr(m, key, value)
 
     # use m.limit to set the maximum number of results to return
@@ -79,6 +77,8 @@ def find(parameters: argparse.Namespace) -> None:
 
 
 def main():
+    """Run the main function for the find builds script."""
+    # start the argument parser
     parser = argparse.ArgumentParser(
         "Find builds",
         description="Find builds with the specified parameters.",
@@ -191,7 +191,7 @@ def main():
     )
 
     parameters_parser.add_argument(
-        "--ranking=attributes",
+        "--ranking-attributes",
         nargs="+",
         help="Attributes to apply to the ranked query.",
         action=AttributesParser,
