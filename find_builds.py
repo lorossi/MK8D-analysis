@@ -12,6 +12,7 @@ from modules.command_parsers import (
     FilterParser,
     SortParser,
     WeightParser,
+    AttributesParser,
 )
 
 
@@ -27,25 +28,26 @@ def find(parameters: argparse.Namespace) -> None:
     if parameters.list_weights:
         print(MK8DeluxeBuilds.getAvailableWeights())
         return
+    if parameters.list_dominants:
+        print(MK8DeluxeBuilds.getAvailableDominants())
+        return
 
     m = MK8DeluxeBuilds()
-    # use m.available_filters or MK8DeluxeBuilds.getAvailableFilters() to get a
-    # list of available filters
-    # assign the value to the corresponding attribute of the MK8DeluxeBuilds object
+
     if parameters.query_filters is not None:
         for key, value in parameters.query_filters.items():
             setattr(m, key, value)
 
-    # use m.available_sorts_order or MK8DeluxeBuilds.getAvailableSortOrders() to get a
-    # list of available sort options
-    # assign the value to the corresponding attribute of the MK8DeluxeBuilds object
-    # -1 to sort descending, 1 to sort ascending
     if parameters.query_sort is not None:
         for key, value in parameters.query_sort.items():
             setattr(m, key, value)
 
     if parameters.query_weights is not None:
         for key, value in parameters.query_weights.items():
+            setattr(m, key, value)
+
+    if parameters.dominant_attributes is not None:
+        for key, value in parameters.dominant_attributes.items():
             setattr(m, key, value)
 
     # use m.limit to set the maximum number of results to return
@@ -100,6 +102,12 @@ def main():
         "--list-weights",
         action="store_true",
         help="List the available weights.",
+    )
+
+    list_parser.add_argument(
+        "--list-dominants",
+        action="store_true",
+        help="List the available dominants.",
     )
 
     # parser group for query options
@@ -157,7 +165,7 @@ def main():
     parameters_parser.add_argument(
         "--limit",
         type=int,
-        required=True,
+        default=5,
         help="Limit the number of results to return.",
     )
 
@@ -183,6 +191,14 @@ def main():
         nargs="+",
         help="Weights to apply to the query.",
         action=WeightParser,
+    )
+
+    parameters_parser.add_argument(
+        "--dominant-attributes",
+        dest="dominant_attributes",
+        nargs="+",
+        help="Attributes to apply to the query skyline.",
+        action=AttributesParser,
     )
 
     args = parser.parse_args()
