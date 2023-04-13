@@ -196,6 +196,8 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         # weights of the attributes for the score calculation
         self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
+        # attributes to consider for the skyline query
+        self._dominant_attributes = dict.fromkeys(PARTS_ATTRIBUTES, False)
 
     def _buildQuery(self, *_) -> str:
         """Build a query to get the data from the database.
@@ -291,6 +293,24 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         self._weights[match.group(1)] = value
 
+    def _setDominant(self, match: Match, value: int) -> None:
+        """Set a dominant attribute.
+
+        Args:
+            match (Match): Match object containing the attribute.
+            value (int): Value of the attribute.
+
+        Raises:
+            AttributeError: Attribute is not valid.
+        """
+        if match.group(1) not in PARTS_ATTRIBUTES:
+            raise AttributeError(f"{match.group(1)} is not a valid dominant")
+
+        if value not in [0, 1]:
+            raise ValueError(f"{value} is not a valid dominant")
+
+        self._dominant_attributes[match.group(1)] = bool(value)
+
     def _getNamedBuilds(self) -> list[NamedBuild]:
         # get all results
         results = self._queryEntities(EntityId.BUILD)
@@ -342,6 +362,11 @@ class MK8DeluxeBuilds(MK8Deluxe):
             self._setWeight(f, __value)
             return
 
+        # try to match the attribute name to a dominant attribute
+        if f := match(r"dominant_([a-z_]+)", __name):
+            self._setDominant(f, __value)
+            return
+
         # set the limit
         if __name == "limit":
             if __value is None:
@@ -376,14 +401,15 @@ class MK8DeluxeBuilds(MK8Deluxe):
         )
         return [r[0] for r in self.query(q)]
 
-    def _bnlAlgorithm(self, builds) -> list[Build]:
+    def _bnlAlgorithm(self, builds: list[NamedBuild]) -> list[NamedBuild]:
+        dominants = [k for k, v in self._dominant_attributes.items() if v is True]
         w = set()
 
         for p in builds:
             if any(pp.dominate(p) for pp in w):
                 continue
 
-            w -= {pp for pp in w if p.dominate(pp)}
+            w -= {pp for pp in w if p.dominate(pp, dominants)}
             w.add(p)
 
         return list(w)
@@ -507,6 +533,24 @@ class MK8DeluxeBuilds(MK8Deluxe):
             list[str]
         """
         return MK8DeluxeBuilds.getAvailableWeights()
+
+    @staticmethod
+    def getAvailableDominants() -> list[str]:
+        """List all the available attributes for the build.
+
+        Returns:
+            list[str]
+        """
+        return [f"dominant_{a}" for a in PARTS_ATTRIBUTES]
+
+    @property
+    def available_dominants(self) -> list[str]:
+        """List all the available attributes for the build.
+
+        Returns:
+            list[str]
+        """
+        return MK8DeluxeBuilds.getAvailableDominants()
 
     @property
     def weights(self) -> dict[str, float]:
