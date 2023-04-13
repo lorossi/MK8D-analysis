@@ -28,8 +28,8 @@ def find(parameters: argparse.Namespace) -> None:
     if parameters.list_weights:
         print(MK8DeluxeBuilds.getAvailableWeights())
         return
-    if parameters.list_dominants:
-        print(MK8DeluxeBuilds.getAvailableDominants())
+    if parameters.list_ranking_attributes:
+        print(MK8DeluxeBuilds.getAvailableRankingAttributes())
         return
 
     m = MK8DeluxeBuilds()
@@ -46,8 +46,8 @@ def find(parameters: argparse.Namespace) -> None:
         for key, value in parameters.query_weights.items():
             setattr(m, key, value)
 
-    if parameters.dominant_attributes is not None:
-        for key, value in parameters.dominant_attributes.items():
+    if parameters.rank_attributes is not None:
+        for key, value in parameters.rank_attributes.items():
             setattr(m, key, value)
 
     # use m.limit to set the maximum number of results to return
@@ -105,9 +105,9 @@ def main():
     )
 
     list_parser.add_argument(
-        "--list-dominants",
+        "--list-ranking-attributes",
         action="store_true",
-        help="List the available dominants.",
+        help="List the available ranking attributes.",
     )
 
     # parser group for query options
@@ -171,7 +171,6 @@ def main():
 
     parameters_parser.add_argument(
         "--query-filters",
-        dest="query_filters",
         nargs="+",
         help="Filters to apply to the query.",
         action=FilterParser,
@@ -179,7 +178,6 @@ def main():
 
     parameters_parser.add_argument(
         "--query-sort",
-        dest="query_sort",
         nargs="+",
         help="Sorting order to apply to the query.",
         action=SortParser,
@@ -187,17 +185,15 @@ def main():
 
     parameters_parser.add_argument(
         "--query-weights",
-        dest="query_weights",
         nargs="+",
         help="Weights to apply to the query.",
         action=WeightParser,
     )
 
     parameters_parser.add_argument(
-        "--dominant-attributes",
-        dest="dominant_attributes",
+        "--ranking=attributes",
         nargs="+",
-        help="Attributes to apply to the query skyline.",
+        help="Attributes to apply to the ranked query.",
         action=AttributesParser,
     )
 

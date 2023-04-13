@@ -36,9 +36,7 @@ class CommandParser(Action):
 
 class FilterParser(CommandParser):
     def __call__(self, *args: Any):
-        super().__call__(
-            *args,
-        )
+        super().__call__(*args)
 
     def validateValue(self, value: str) -> bool:
         try:
@@ -54,9 +52,7 @@ class FilterParser(CommandParser):
 
 class SortParser(CommandParser):
     def __call__(self, *args: Any):
-        super().__call__(
-            *args,
-        )
+        super().__call__(*args)
 
     def validateValue(self, value: str) -> bool:
         return value in ["1", "-1"]
@@ -67,9 +63,7 @@ class SortParser(CommandParser):
 
 class WeightParser(CommandParser):
     def __call__(self, *args: Any):
-        super().__call__(
-            *args,
-        )
+        super().__call__(*args)
 
     def validateValue(self, value: str) -> bool:
         try:
@@ -85,12 +79,10 @@ class WeightParser(CommandParser):
 
 class AttributesParser(CommandParser):
     def __call__(self, *args: Any):
-        super().__call__(
-            *args,
-        )
+        super().__call__(*args)
 
     def validateValue(self, value: str) -> bool:
         return value in ["1", "0"]
 
     def validateKey(self, key: str) -> bool:
-        return key in MK8DeluxeBuilds.getAvailableDominants()
+        return key in MK8DeluxeBuilds.getAvailableRankingAttributes()

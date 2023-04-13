@@ -197,7 +197,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         # weights of the attributes for the score calculation
         self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
         # attributes to consider for the skyline query
-        self._dominant_attributes = dict.fromkeys(PARTS_ATTRIBUTES, False)
+        self._rank_attributes = dict.fromkeys(PARTS_ATTRIBUTES, False)
 
     def _buildQuery(self, *_) -> str:
         """Build a query to get the data from the database.
@@ -293,8 +293,8 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
         self._weights[match.group(1)] = value
 
-    def _setDominant(self, match: Match, value: int) -> None:
-        """Set a dominant attribute.
+    def _setRankingAttribute(self, match: Match, value: int) -> None:
+        """Set a ranking attribute.
 
         Args:
             match (Match): Match object containing the attribute.
@@ -304,12 +304,12 @@ class MK8DeluxeBuilds(MK8Deluxe):
             AttributeError: Attribute is not valid.
         """
         if match.group(1) not in PARTS_ATTRIBUTES:
-            raise AttributeError(f"{match.group(1)} is not a valid dominant")
+            raise AttributeError(f"{match.group(1)} is not a valid attributes")
 
         if value not in [0, 1]:
-            raise ValueError(f"{value} is not a valid dominant")
+            raise ValueError(f"{value} is not a valid attributes")
 
-        self._dominant_attributes[match.group(1)] = bool(value)
+        self._rank_attributes[match.group(1)] = bool(value)
 
     def _getNamedBuilds(self) -> list[NamedBuild]:
         # get all results
@@ -362,9 +362,9 @@ class MK8DeluxeBuilds(MK8Deluxe):
             self._setWeight(f, __value)
             return
 
-        # try to match the attribute name to a dominant attribute
-        if f := match(r"dominant_([a-z_]+)", __name):
-            self._setDominant(f, __value)
+        # try to match the attribute name to a rank attribute
+        if f := match(r"rank_([a-z_]+)", __name):
+            self._setRankingAttribute(f, __value)
             return
 
         # set the limit
@@ -402,14 +402,14 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return [r[0] for r in self.query(q)]
 
     def _bnlAlgorithm(self, builds: list[NamedBuild]) -> list[NamedBuild]:
-        dominants = [k for k, v in self._dominant_attributes.items() if v is True]
+        attributes = [k for k, v in self._rank_attributes.items() if v is True]
         w = set()
 
         for p in builds:
             if any(pp.dominate(p) for pp in w):
                 continue
 
-            w -= {pp for pp in w if p.dominate(pp, dominants)}
+            w -= {pp for pp in w if p.dominate(pp, attributes)}
             w.add(p)
 
         return list(w)
@@ -535,22 +535,22 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return MK8DeluxeBuilds.getAvailableWeights()
 
     @staticmethod
-    def getAvailableDominants() -> list[str]:
-        """List all the available attributes for the build.
+    def getAvailableRankingAttributes() -> list[str]:
+        """List all the available ranking attributes for the build.
 
         Returns:
             list[str]
         """
-        return [f"dominant_{a}" for a in PARTS_ATTRIBUTES]
+        return [f"attributes_{a}" for a in PARTS_ATTRIBUTES]
 
     @property
-    def available_dominants(self) -> list[str]:
+    def ranking_attributes(self) -> list[str]:
         """List all the available attributes for the build.
 
         Returns:
             list[str]
         """
-        return MK8DeluxeBuilds.getAvailableDominants()
+        return MK8DeluxeBuilds.getAvailableRankingAttributes()
 
     @property
     def weights(self) -> dict[str, float]:
