@@ -541,7 +541,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         Returns:
             list[str]
         """
-        return [f"attributes_{a}" for a in PARTS_ATTRIBUTES]
+        return [f"rank_{a}" for a in PARTS_ATTRIBUTES]
 
     @property
     def ranking_attributes(self) -> list[str]:
