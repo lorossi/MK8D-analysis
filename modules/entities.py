@@ -222,11 +222,15 @@ class NamedBuild:
             + ")"
         )
 
-    def __compare__(self, other: NamedBuild) -> tuple[int, int, int]:
+    def __compare__(
+        self, other: NamedBuild, attributes: list[str] = None
+    ) -> tuple[int, int, int]:
         """Compare the named build to another one.
 
         Args:
             other (NamedBuild)
+            attributes (list[str], optional): List of attributes to compare. \
+                Defaults to None (all attributes are compared)
 
         Returns:
             tuple[int, int, int]: number of lower, equal and higher attributes.
@@ -235,11 +239,17 @@ class NamedBuild:
         equal = 0
         lower = 0
 
-        for k in self.__dict__.keys():
-            if k.startswith("_"):
-                continue
+        if attributes is None:
+            to_compare = self.attributes
+            to_compare.pop("score")
+            to_compare.pop("score_dev")
+        else:
+            to_compare = attributes
 
-            if k == "id" or not isinstance(self.__dict__[k], int):
+        for k in to_compare:
+            if k == "id":
+                continue
+            if self.__dict__[k].__class__ not in [int, float]:
                 continue
 
             diff = self.__dict__[k] - other.__dict__[k]
@@ -253,8 +263,23 @@ class NamedBuild:
 
         return lower, equal, higher
 
-    def dominate(self, other: NamedBuild) -> bool:
-        lower, _, higher = self.__compare__(other)
+    def dominate(self, other: NamedBuild, attributes: list[str] = None) -> bool:
+        """Check if the named build dominates the other one.
+
+        Args:
+            other (NamedBuild):
+            attributes (list[str], optional): List of attributes to compare. \
+                Defaults to None (all attributes are compared)
+
+        Returns:
+            bool: True if the named build dominates the other one.
+        """
+        if attributes and len(attributes) == 0:
+            raise ValueError(
+                "At least one attribute must be provided for the skyline query"
+            )
+
+        lower, _, higher = self.__compare__(other, attributes)
         return higher > 0 and lower == 0
 
     def toJSON(self, indent=0, sort_keys=False) -> str:
@@ -332,9 +357,16 @@ class NamedBuild:
         Returns:
             dict[str, float | int | list[str]]: Attributes.
         """
-        attrs = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+        attrs = {}
         attrs["score"] = self.score
         attrs["score_dev"] = self.score_dev
+        for k, v in self.__dict__.items():
+            if k == "score" or k == "score_dev":
+                continue
+            if k.startswith("_"):
+                continue
+
+            attrs[k] = v
         return attrs
 
     @property
