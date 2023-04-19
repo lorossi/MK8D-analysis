@@ -91,20 +91,64 @@ After playing for a long while, I found out that:
 
 So I tweaked the weights and the filters, finally setting:
 
-- The minimum ground speed to 12
-- The minimum ground acceleration to 12
-- The minimum miniturbo to 5
-- Ground speed weight to 0.5
-- Acceleration weight to 0.5
-- Miniturbo weight to 0.1
+- The **minimum ground speed** to 12
+- The **minimum ground acceleration** to 12
+- The **minimum miniturbo** to 5
+- **Ground speed** weight to 0.5
+- **Acceleration** weight to 0.5
+- **Miniturbo** weight to 0.1
 
 The top 5 builds, sorted by *score* and the *standard deviation* of the stats, are the following:
 
+| score | score_dev |  id   | ground_speed | water_speed | air_speed | antigravity_speed | acceleration | weight | ground_handling | water_handling | air_handling | antigravity_handling | miniturbo | on_road_traction | off_road_traction |          driver           |                   vehicle                   |         tyre         |                        glider                        |
+| :---: | :-------: | :---: | :----------: | :---------: | :-------: | :---------------: | :----------: | :----: | :-------------: | :------------: | :----------: | :------------------: | :-------: | :--------------: | :---------------: | :-----------------------: | :-----------------------------------------: | :------------------: | :--------------------------------------------------: |
+| 13.9  |   2.81    | 6057  |      12      |     16      |    16     |        13         |      13      |   10   |       10        |       8        |      11      |          10          |    14     |        14        |         8         | Donkey Kong, Waluigi, Roy |  Standard Kart, The Duke, 300 SL Roadster   | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 13.9  |   2.81    | 6059  |      12      |     15      |    16     |        13         |      13      |   11   |       10        |       9        |      11      |          9           |    14     |        15        |         7         | Donkey Kong, Waluigi, Roy |  Standard Kart, The Duke, 300 SL Roadster   | Roller, Azure Roller | Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil  |
+| 13.9  |   2.81    | 6200  |      12      |     15      |    18     |        12         |      13      |   11   |       11        |       8        |      11      |          10          |    14     |        15        |         8         | Donkey Kong, Waluigi, Roy | Cat Cruiser, Comet, Yoshi Bike, Teddy Buggy | Roller, Azure Roller |        Super Glider, Waddle Wing, Hylian Kite        |
+| 13.9  |   2.81    | 6202  |      12      |     14      |    18     |        13         |      13      |   12   |       11        |       9        |      11      |          9           |    14     |        16        |         7         | Donkey Kong, Waluigi, Roy | Cat Cruiser, Comet, Yoshi Bike, Teddy Buggy | Roller, Azure Roller |  Wario Wing, Plane Glider, Gold Glider, Paraglider   |
+| 13.9  |   2.81    | 6217  |      12      |     14      |    16     |        15         |      13      |   10   |       10        |       7        |      10      |          10          |    14     |        16        |         7         | Donkey Kong, Waluigi, Roy | Cat Cruiser, Comet, Yoshi Bike, Teddy Buggy |  Button, Leaf Tyres  | Cloud Glider, Parachute, Flower Glider, Paper Glider |
 
+The command used to generate this table is:
 
-I played a lot with this build, and I can say that it is pretty good.
+```bash
+python3 find_builds.py  --limit 5 --score --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-weights weight_ground_speed=0.5 weight_acceleration=0.5 weight_miniturbo=0.1 --query-sort sort_score=-1 sort_score_dev=-1 --markdown
+
+```
+
+According to the results, the best build is the one with the following stats:
+
+- **Driver**: Donkey Kong, Waluigi, Roy
+- **Vehicle**: Standard Kart, The Duke, 300 SL Roadster
+- **Tyre**: Roller, Azure Roller
+- **Glider**: Cloud Glider, Parachute, Flower Glider, Paper Glider
+
+Yielding the following stats:
+
+- **Ground speed**: 12
+- **Acceleration**: 13
+- **Miniturbo**: 14
+- **Weight**: 10
+- **Ground handling**: 10
+
+With a score of 13.9 and a standard deviation of 2.81.
+
+I played a bit with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
 Due to the high score in drifting, I recommend drifting *EVERYWHERE*, even on straight lines, as it will help you to get a good speed up.
+
+### Alternative, better, solution
+
+- TODO add the explanation of the BNL algorithm
+- TODO add the explanation of the BFS algorithm
+- TODO finish implementing and add explanation of the kmeans algorithm
+- TODO add the medrank algorithm
+- TODO add the skyband algorithm (tuples dominated by less than n other tuples)
+
+The command used to generate this table is:
+
+```bash
+python3 find_builds.py --limit 5 --skyline-bln --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+```
 
 ## The code
 
@@ -120,7 +164,6 @@ A database containing the builds will be created in the main folder of the scrip
 
 - TODO add the description of the commands
 - TODO add some examples
-- TODO add the explanation of the BNL algorithm
 
 The minimum and maximum values, the sort order, the weights and the number of builds to be shown can be passed as attributes to the `MK8DeluxeBuilds` class.
 A list of available filters, sort orders, and weights can be found respectively in the `available_filters`, `available_sort_orders` and `available_weights` attributes of the `MK8DeluxeBuilds` class.
