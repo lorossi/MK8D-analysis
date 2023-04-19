@@ -55,7 +55,6 @@ def find(parameters: argparse.Namespace) -> None:
     # or the best builds can be computed via the BNL algorithm (for skyline queries,
     # check the readme for more info)
 
-    print(parameters)
     if parameters.topk:
         m.algorithm = "topk"
     elif parameters.skyline:
