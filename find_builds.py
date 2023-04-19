@@ -17,20 +17,20 @@ from modules.database import MK8DeluxeBuilds
 
 def find(parameters: argparse.Namespace) -> None:
     """Run the main function for the create named builds script."""
+    m = MK8DeluxeBuilds()
+
     if parameters.list_filters:
-        print(MK8DeluxeBuilds.getAvailableFilters())
+        print(MK8DeluxeBuilds.available_filters)
         return
     if parameters.list_sort_orders:
-        print(MK8DeluxeBuilds.getAvailableSortOrders())
+        print(MK8DeluxeBuilds.available_sorts_orders)
         return
     if parameters.list_weights:
-        print(MK8DeluxeBuilds.getAvailableWeights())
+        print(MK8DeluxeBuilds.available_weights)
         return
     if parameters.list_ranking_attributes:
-        print(MK8DeluxeBuilds.getAvailableRankingAttributes())
+        print(MK8DeluxeBuilds.available_ranking_attributes)
         return
-
-    m = MK8DeluxeBuilds()
 
     if parameters.query_filters is not None:
         for key, value in parameters.query_filters.items():
@@ -55,12 +55,15 @@ def find(parameters: argparse.Namespace) -> None:
     # or the best builds can be computed via the BNL algorithm (for skyline queries,
     # check the readme for more info)
 
+    print(parameters)
     if parameters.topk:
         m.algorithm = "topk"
     elif parameters.skyline:
         m.algorithm = "skyline"
-    elif parameters.kmeans:
+    elif parameters.k_means:
         m.algorithm = "kmeans"
+    elif parameters.medrank:
+        m.algorithm = "medrank"
 
     builds = m.sortBuilds()
 
@@ -154,8 +157,7 @@ def main():
     algorithm_parser.add_argument(
         "--topk",
         action="store_true",
-        default=True,
-        help="Find the builds according to their topks (default).",
+        help="Find the builds according to their score, using the top-k algorithm.",
     )
 
     algorithm_parser.add_argument(
@@ -168,6 +170,12 @@ def main():
         "--k-means",
         action="store_true",
         help="Find the builds according to the K-Means algorithm.",
+    )
+
+    algorithm_parser.add_argument(
+        "--medrank",
+        action="store_true",
+        help="Find the builds according to the MedRank algorithm.",
     )
 
     # parser group for query parameters

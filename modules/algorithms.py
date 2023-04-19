@@ -96,7 +96,29 @@ class Algorithms:
         return centroids
 
     def _medrank(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
-        raise NotImplementedError
+        if limit := kwargs.get("limit") is None:
+            limit = 5
+
+        attributes = [k for k, v in kwargs["rank_attributes"] if v is True]
+        lists = [[] for _ in range(len(attributes))]
+        sorted_builds = []
+
+        for x, a in enumerate(attributes):
+            lists[x] = sorted(builds, key=lambda x: x.__getattribute__(a))
+
+        for x, b in enumerate(builds):
+            positions = [len(builds) for _ in range(len(attributes))]
+            for y, a in enumerate(attributes):
+                # get the position of the build in the list
+                positions[y] = lists[y].index(b)
+
+            # get the median position
+            median = sorted(positions)[len(positions) // 2]
+            sorted_builds.append((median, b))
+
+        sorted_builds.sort(key=lambda x: x[0])
+
+        return [b for _, b in sorted_builds[:limit]]
 
     @property
     def available_algorithms(self) -> list[str]:

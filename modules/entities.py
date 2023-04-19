@@ -223,6 +223,32 @@ class NamedBuild:
             + ")"
         )
 
+    def __eq__(self, __value: object) -> bool:
+        """Dunder method for the equality of two named builds.
+
+        Args:
+            __value (object): The other named build.
+
+        Returns:
+            bool: True if the named builds are equal, False otherwise.
+        """
+        if self.__class__ != __value.__class__:
+            return False
+
+        for k, v in self.attributes.items():
+            if v != __value.attributes[k]:
+                return False
+
+        return True
+
+    def __hash__(self) -> int:
+        """Dunder method for the hash of the named build.
+
+        Returns:
+            int: The hash of the named build.
+        """
+        return hash(str(self))
+
     def __compare__(
         self, other: NamedBuild, attributes: list[str] = None
     ) -> tuple[int, int, int]:
