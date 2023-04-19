@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from statistics import stdev
+from math import sqrt
 
 from ujson import dumps
 
@@ -281,6 +282,40 @@ class NamedBuild:
 
         lower, _, higher = self.__compare__(other, attributes)
         return higher > 0 and lower == 0
+
+    def distance(self, other: NamedBuild, attributes: list[str] = None) -> float:
+        """Return the distance between the named build and the other one.
+
+        Args:
+            other (NamedBuild):
+            attributes (list[str], optional): List of attributes to compare. \
+                Defaults to None (all attributes are compared)
+
+        Returns:
+            float: The distance between the named build and the other one.
+        """
+        if attributes and len(attributes) == 0:
+            raise ValueError(
+                "At least one attribute must be provided for the k-means query"
+            )
+
+        if attributes is None:
+            to_compare = self.attributes
+            to_compare.pop("score")
+            to_compare.pop("score_dev")
+        else:
+            to_compare = attributes
+
+        distance = 0
+        for k in to_compare:
+            if k == "id":
+                continue
+            if self.__dict__[k].__class__ not in [int, float]:
+                continue
+
+            distance += (self.__dict__[k] - other.__dict__[k]) ** 2
+
+        return sqrt(distance)
 
     def toJSON(self, indent=0, sort_keys=False) -> str:
         """Return the JSON representation of the named build.
