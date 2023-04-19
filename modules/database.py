@@ -1,11 +1,10 @@
 """This module contains the Database class and all its subclasses."""
 from __future__ import annotations
 
-import random
 import sqlite3
-from datetime import datetime
 from re import Match, match
 
+from .algorithms import Algorithms
 from .constants import (
     DATA_ATTRIBUTES,
     ID_ATTRIBUTES,
@@ -175,7 +174,7 @@ class MK8Deluxe(Database):
             list[Entity]: list of entities.
         """
         if __name not in [x.value for x in EntityId]:
-            return super().__getattribute__(__name)
+            return self.__getattribute__(__name)
 
         results = self._queryEntities(EntityId(__name))
 
@@ -191,6 +190,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
     def __init__(self) -> MK8DeluxeBuilds:
         """Create a MK8DeluxeBuilds object."""
         super().__init__()
+        self._algorithms = Algorithms()
         self._sql_filter = []  # filter for attributes
         self._data_filter = []  # filter for data attributes such as score or stddev
         self._sort = []  # list of attributes to sort by
@@ -403,65 +403,6 @@ class MK8DeluxeBuilds(MK8Deluxe):
         )
         return [r[0] for r in self.query(q)]
 
-    def _bnlAlgorithm(self, builds: list[NamedBuild]) -> list[NamedBuild]:
-        attributes = [k for k, v in self._rank_attributes.items() if v is True]
-        w: set[NamedBuild] = set()
-
-        for p in builds:
-            if any(pp.dominate(p, attributes) for pp in w):
-                continue
-
-            w -= {pp for pp in w if p.dominate(pp, attributes)}
-            w.add(p)
-
-        return list(w)
-
-    def _sfsAlgorithm(self, builds: list[NamedBuild]) -> list[NamedBuild]:
-        attributes = [k for k, v in self._rank_attributes.items() if v is True]
-        for f in self._sort[::-1]:
-            builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
-
-        w: set[NamedBuild] = set()
-
-        for p in builds:
-            if any(pp.dominate(p, attributes) for pp in w):
-                continue
-            w.add(p)
-
-        return list(w)
-
-    def _findClosestBuild(
-        self, centroid: NamedBuild, builds: list[NamedBuild], attributes: list[str]
-    ) -> NamedBuild:
-        return
-
-    def _kMeansAlgorithm(
-        self, builds: list[NamedBuild], seed: float = None, k: int = None
-    ) -> list[NamedBuild]:
-        if seed is None:
-            seed = datetime.now()
-
-        if k is None:
-            k = self._limit
-
-        random.seed(seed)
-
-        attributes = [k for k, v in self._rank_attributes.items() if v is True]
-        centroids = random.sample(builds, k)
-
-        while True:
-            new_centroids = []
-            for c in centroids:
-                closest = min(builds, key=lambda x: c.distance(x, attributes))
-                new_centroids.append(closest)
-
-            if new_centroids == centroids:
-                break
-
-            centroids = new_centroids
-
-        return centroids
-
     def _returnBuilds(self, builds: list[NamedBuild]) -> list[NamedBuild]:
         # sort the builds by score
         for f in self._sort[::-1]:
@@ -472,6 +413,45 @@ class MK8DeluxeBuilds(MK8Deluxe):
             builds = builds[: self._limit]
 
         return builds
+
+    def sortBuilds(self) -> list[NamedBuild]:
+        """Sort the builds according to the selected algorithm.
+
+        Returns:
+            list[NamedBuild]: list of sorted builds.
+        """
+        builds = self._getNamedBuilds()
+        sorted_builds = self._algorithms.runAlgorithm(
+            builds,
+            sort=self._sort,
+            limit=self._limit,
+            weight=self._weights,
+            rank_attribute=self._rank_attributes,
+        )
+        return self._returnBuilds(sorted_builds)
+
+    @property
+    def algorithm(self) -> str:
+        """Get the selected algorithm.
+
+        Returns:
+            str: name of the algorithm.
+        """
+        return self._algorithms.current_algorithm
+
+    @algorithm.setter
+    def algorithm(self, value: str) -> None:
+        """Set the algorithm.
+
+        Args:
+            value (str): name of the algorithm.
+
+        Raises:
+            ValueError: algorithm is not valid.
+        """
+        if value not in self._algorithms.available_algorithms:
+            raise ValueError(f"{value} is not a valid algorithm")
+        self._algorithms.setAlgorithm(value)
 
     @property
     def builds(self) -> list[Build]:
@@ -484,56 +464,16 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return [Build(**row) for row in results]
 
     @property
-    def scored_named_builds(self) -> list[NamedBuild]:
-        """Get the builds with parts names.
+    def available_ranking_algorithms(self) -> list[str]:
+        """List all the available ranking algorithms.
 
         Returns:
-            list[NamedBuild]: list of builds with parts names.
+            list[str]: list of ranking algorithms.
         """
-        builds = self._getNamedBuilds()
-        return self._returnBuilds(builds)
+        return self._algorithms.available_algorithms
 
     @property
-    def skyline_named_builds_bln(self) -> list[NamedBuild]:
-        """Get the skyline builds with parts names.
-
-        The algorithm is based on the BNL algorithm.
-
-        Returns:
-            list[NamedBuild]: list of dominating builds with parts names.
-        """
-        builds = self._getNamedBuilds()
-        dominating = self._bnlAlgorithm(builds)
-        return self._returnBuilds(dominating)
-
-    @property
-    def skyline_named_builds_sfs(self) -> list[NamedBuild]:
-        """Get the skyline builds with parts names.
-
-        The algorithm is based on the SFS algorithm.
-
-        Returns:
-            list[NamedBuild]: list of dominating builds with parts names.
-        """
-        builds = self._getNamedBuilds()
-        dominating = self._sfsAlgorithm(builds)
-        return self._returnBuilds(dominating)
-
-    @property
-    def k_means_named_builds(self) -> list[NamedBuild]:
-        """Get the skyline builds with parts names.
-
-        The algorithm is based on the k-means algorithm.
-
-        Returns:
-            list[NamedBuild]: list of dominating builds with parts names.
-        """
-        builds = self._getNamedBuilds()
-        dominating = self._kMeansAlgorithm(builds)
-        return self._returnBuilds(dominating)
-
-    @staticmethod
-    def getAvailableFilters() -> list[str]:
+    def available_filters(self) -> list[str]:
         """List all the available filters for the build.
 
         Pass the filter name to the instance of the object to set it.
@@ -550,20 +490,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         ]
 
     @property
-    def available_filters(self) -> list[str]:
-        """List all the available filters for the build.
-
-        Pass the filter name to the instance of the object to set it.
-        The attribute accepts a value.
-
-
-        Returns:
-            list[str]
-        """
-        return MK8DeluxeBuilds.getAvailableFilters()
-
-    @staticmethod
-    def getAvailableSortOrders() -> list[str]:
+    def available_sorts_orders(self) -> list[str]:
         """List all the available sorts for the build.
 
         Pass the sort name to the instance of the object to set it.
@@ -575,19 +502,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return [f"sort_{a}" for a in PARTS_ATTRIBUTES + DATA_ATTRIBUTES]
 
     @property
-    def available_sorts_order(self) -> list[str]:
-        """List all the available sorts for the build.
-
-        Pass the sort name to the instance of the object to set it.
-        The attribute accepts a value of 1 for ascending and -1 for descending.
-
-        Returns:
-            list[str]
-        """
-        return MK8DeluxeBuilds.getAvailableSortOrders()
-
-    @staticmethod
-    def getAvailableWeights() -> list[str]:
+    def available_weights(self) -> list[str]:
         """List all the available weights for the scoring of the builds.
 
         Pass the weight name to the instance of the object to set it.
@@ -599,34 +514,13 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return [f"weight_{a}" for a in PARTS_ATTRIBUTES]
 
     @property
-    def available_weights(self) -> list[str]:
-        """List all the available weights for the scoring of the builds.
-
-        Pass the weight name to the instance of the object to set it.
-        The attribute accepts a value of type float.
-
-        Returns:
-            list[str]
-        """
-        return MK8DeluxeBuilds.getAvailableWeights()
-
-    @staticmethod
-    def getAvailableRankingAttributes() -> list[str]:
-        """List all the available ranking attributes for the build.
-
-        Returns:
-            list[str]
-        """
-        return [f"rank_{a}" for a in PARTS_ATTRIBUTES]
-
-    @property
-    def ranking_attributes(self) -> list[str]:
+    def available_ranking_attributes(self) -> list[str]:
         """List all the available attributes for the build.
 
         Returns:
             list[str]
         """
-        return MK8DeluxeBuilds.getAvailableRankingAttributes()
+        return [f"rank_{a}" for a in PARTS_ATTRIBUTES]
 
     @property
     def weights(self) -> dict[str, float]:

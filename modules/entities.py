@@ -369,16 +369,6 @@ class NamedBuild:
             if isinstance(v, list):
                 return ", ".join(v)
 
-            if isinstance(v, float):
-                if v == 0.0:
-                    return "N/A"
-                return f"{v:.2f}"
-
-            if isinstance(v, int):
-                if v == 0:
-                    return "N/A"
-                return f"{v}"
-
             return str(v)
 
         return "| " + " | ".join(format_val(v) for v in self.attributes.values()) + " |"

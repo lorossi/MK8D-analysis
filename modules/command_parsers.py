@@ -73,7 +73,7 @@ class FilterParser(CommandParser):
 
     def validateKey(self, key: str) -> bool:
         """Validate the key of a parameter."""
-        return key in MK8DeluxeBuilds.getAvailableFilters()
+        return key in MK8DeluxeBuilds().available_filters
 
 
 class SortParser(CommandParser):
@@ -89,7 +89,7 @@ class SortParser(CommandParser):
 
     def validateKey(self, key: str) -> bool:
         """Validate the key of a parameter."""
-        return key in MK8DeluxeBuilds.getAvailableSortOrders()
+        return key in MK8DeluxeBuilds().available_sorts_orders
 
 
 class WeightParser(CommandParser):
@@ -110,7 +110,7 @@ class WeightParser(CommandParser):
 
     def validateKey(self, key: str) -> bool:
         """Validate the key of a parameter."""
-        return key in MK8DeluxeBuilds.getAvailableWeights()
+        return key in MK8DeluxeBuilds().available_weights
 
 
 class AttributesParser(CommandParser):
@@ -126,4 +126,4 @@ class AttributesParser(CommandParser):
 
     def validateKey(self, key: str) -> bool:
         """Validate the key of a parameter."""
-        return key in MK8DeluxeBuilds.getAvailableRankingAttributes()
+        return key in MK8DeluxeBuilds().available_ranking_attributes
