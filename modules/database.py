@@ -1,7 +1,9 @@
 """This module contains the Database class and all its subclasses."""
 from __future__ import annotations
 
+import random
 import sqlite3
+from datetime import datetime
 from re import Match, match
 
 from .constants import (
@@ -403,16 +405,62 @@ class MK8DeluxeBuilds(MK8Deluxe):
 
     def _bnlAlgorithm(self, builds: list[NamedBuild]) -> list[NamedBuild]:
         attributes = [k for k, v in self._rank_attributes.items() if v is True]
-        w = set()
+        w: set[NamedBuild] = set()
 
         for p in builds:
-            if any(pp.dominate(p) for pp in w):
+            if any(pp.dominate(p, attributes) for pp in w):
                 continue
 
             w -= {pp for pp in w if p.dominate(pp, attributes)}
             w.add(p)
 
         return list(w)
+
+    def _sfsAlgorithm(self, builds: list[NamedBuild]) -> list[NamedBuild]:
+        attributes = [k for k, v in self._rank_attributes.items() if v is True]
+        for f in self._sort[::-1]:
+            builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
+
+        w: set[NamedBuild] = set()
+
+        for p in builds:
+            if any(pp.dominate(p, attributes) for pp in w):
+                continue
+            w.add(p)
+
+        return list(w)
+
+    def _findClosestBuild(
+        self, centroid: NamedBuild, builds: list[NamedBuild], attributes: list[str]
+    ) -> NamedBuild:
+        return
+
+    def _kMeansAlgorithm(
+        self, builds: list[NamedBuild], seed: float = None, k: int = None
+    ) -> list[NamedBuild]:
+        if seed is None:
+            seed = datetime.now()
+
+        if k is None:
+            k = self._limit
+
+        random.seed(seed)
+
+        attributes = [k for k, v in self._rank_attributes.items() if v is True]
+        centroids = random.sample(builds, k)
+
+        while True:
+            new_centroids = []
+            for c in centroids:
+                closest = min(builds, key=lambda x: c.distance(x, attributes))
+                new_centroids.append(closest)
+
+            if new_centroids == centroids:
+                break
+
+            centroids = new_centroids
+
+        return centroids
 
     def _returnBuilds(self, builds: list[NamedBuild]) -> list[NamedBuild]:
         # sort the builds by score
@@ -446,14 +494,42 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return self._returnBuilds(builds)
 
     @property
-    def dominating_named_builds(self) -> list[NamedBuild]:
-        """Get the dominating builds with parts names.
+    def skyline_named_builds_bln(self) -> list[NamedBuild]:
+        """Get the skyline builds with parts names.
+
+        The algorithm is based on the BNL algorithm.
 
         Returns:
             list[NamedBuild]: list of dominating builds with parts names.
         """
         builds = self._getNamedBuilds()
         dominating = self._bnlAlgorithm(builds)
+        return self._returnBuilds(dominating)
+
+    @property
+    def skyline_named_builds_sfs(self) -> list[NamedBuild]:
+        """Get the skyline builds with parts names.
+
+        The algorithm is based on the SFS algorithm.
+
+        Returns:
+            list[NamedBuild]: list of dominating builds with parts names.
+        """
+        builds = self._getNamedBuilds()
+        dominating = self._sfsAlgorithm(builds)
+        return self._returnBuilds(dominating)
+
+    @property
+    def k_means_named_builds(self) -> list[NamedBuild]:
+        """Get the skyline builds with parts names.
+
+        The algorithm is based on the k-means algorithm.
+
+        Returns:
+            list[NamedBuild]: list of dominating builds with parts names.
+        """
+        builds = self._getNamedBuilds()
+        dominating = self._kMeansAlgorithm(builds)
         return self._returnBuilds(dominating)
 
     @staticmethod
