@@ -191,7 +191,6 @@ The command to use this algorithm is:
 python3 find_builds.py --limit 5 --kmeans --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
 ```
 
-
 ## The code
 
 The code used to create builds is all found in the `find_builds.py` file, while the code used to create the builds is in the `create_builds.py` file.
@@ -203,7 +202,6 @@ A database containing the builds will be created in the main folder of the scrip
 - `--csv` to output the builds in a csv format
 - `--json` and `--json-pretty` to output the builds in a json format
 - `--markdown` to output the builds in a markdown table format
-
 
 The minimum and maximum values, the sort order, the weights and the number of builds to be shown can be passed as attributes to the `MK8DeluxeBuilds` class.
 A list of available filters, sort orders, and weights can be found respectively in the `available_filters`, `available_sort_orders` and `available_weights` attributes of the `MK8DeluxeBuilds` class.
