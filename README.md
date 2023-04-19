@@ -66,13 +66,14 @@ The script `find_builds.py` loads all the created builds in the previous step an
 To do so, the script:
 
 - Accepts a minimum and maximum value for each stat
-- Orders the builds in an order according to the user's needs
 - Computes a score for each build, according to some custom weights
+- Sorts the builds in an order according to the user's needs
 - Limits the number of builds to be shown
 
-All of these manipulations are done via dunder methods, which makes the code very readable *(I hope)* as it reduces the overall verbosity and makes the code more compact.
+The part relative to the sorting is implemented via an algorithm called `top-k`.
+All the entities manipulations are done via dunder methods, which makes the code very readable *(I hope)* as it reduces the overall verbosity and makes the code more compact.
 
-The output of the script can be either printed to the console "raw" *(in a human-readable format)*, in `json` or `csv` format.
+The output of the script can be either printed to the console "raw" *(in a human-readable format)*, `json`, `csv`, table formatted in `markdown`, or `toml` format.
 
 ## The results
 
@@ -111,7 +112,7 @@ The top 5 builds, sorted by *score* and the *standard deviation* of the stats, a
 The command used to generate this table is:
 
 ```bash
-python3 find_builds.py  --limit 5 --score --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-weights weight_ground_speed=0.5 weight_acceleration=0.5 weight_miniturbo=0.1 --query-sort sort_score=-1 sort_score_dev=-1 --markdown
+python3 find_builds.py  --limit 5 --top-k --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-weights weight_ground_speed=0.5 weight_acceleration=0.5 weight_miniturbo=0.1 --query-sort sort_score=-1 sort_score_dev=-1 --markdown
 
 ```
 
@@ -136,19 +137,60 @@ I played a bit with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
 Due to the high score in drifting, I recommend drifting *EVERYWHERE*, even on straight lines, as it will help you to get a good speed up.
 
-### Alternative, better, solution
+## Alternative, better, solutions
 
-- TODO add the explanation of the BNL algorithm
-- TODO add the explanation of the BFS algorithm
-- TODO finish implementing and add explanation of the kmeans algorithm
-- TODO add the medrank algorithm
-- TODO add the skyband algorithm (tuples dominated by less than n other tuples)
+Finding the correct weights is however a bit tricky: it's hard to find the "best" build according to parameters that are not well defined.
+This is why other algorithms (such as the skyline algorithm) have been created.
 
-The command used to generate this table is:
+I decided to implement $3$ of them:
+
+1. The Medrank algorithm
+2. The skyline algorithm
+3. The kmeans algorithm
+
+Their results and explanations are shown below.
+
+### Medrank algorithm
+
+The Medrank algorithm allows to compare the stats of the builds without having to rank them according arbitrary weights.
+It works by comparing the stats of the builds to the median of the stats of all the builds; the builds with the best mean positions are then selected.
+
+The command to use this algorithm is:
 
 ```bash
-python3 find_builds.py --limit 5 --skyline-bln --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+python3 find_builds.py  --limit 5 --medrank --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --query-sort sort_ground_speed=-1 sort_score_dev=-1 --markdown
 ```
+
+### Skyline algorithm
+
+The skyline algorithm provides a way to find the best build according to a set of parameters.
+It returns a set of tuple, each of which "dominates" the other tuples in the set, following these two rules:
+
+- a tuple must be better than another tuple in at least one of the parameters
+- a tuple must be at least as good as another tuple in all the other parameters
+
+As such, only the tuples that are "dominating" other tuples are returned;
+this ensures that the builds returned are the best in some way, but not necessarily the best overall.
+
+The command to use this algorithm is:
+
+```bash
+python3 find_builds.py --limit 5 --skyline --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+```
+
+### Kmeans algorithm
+
+The kmeans algorithm is a clustering algorithm that allows to group the builds according to their stats.
+It returns the "centroids" of a set of clusters, which are the builds that are the closest to the mean of the builds in the cluster.
+
+This ensures that the centroid is the most balanced build in the cluster, but it doesn't ensure that it's the best build overall.
+
+The command to use this algorithm is:
+
+```bash
+python3 find_builds.py --limit 5 --kmeans --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+```
+
 
 ## The code
 
@@ -162,8 +204,6 @@ A database containing the builds will be created in the main folder of the scrip
 - `--json` and `--json-pretty` to output the builds in a json format
 - `--markdown` to output the builds in a markdown table format
 
-- TODO add the description of the commands
-- TODO add some examples
 
 The minimum and maximum values, the sort order, the weights and the number of builds to be shown can be passed as attributes to the `MK8DeluxeBuilds` class.
 A list of available filters, sort orders, and weights can be found respectively in the `available_filters`, `available_sort_orders` and `available_weights` attributes of the `MK8DeluxeBuilds` class.
@@ -175,7 +215,7 @@ In the foreseeable future, I plan to add:
 - Tests *(I know, I know)*
 - A simple web interface, to make the data more accessible to everyone
 - Some way of automating the process of finding the best builds
-  - if only Nintendo shared some stats about the multiplayer way, I could find a way to auto-generate the weights...
+  - if only Nintendo shared some stats about the multiplayer way, I could find a way to auto-generate the weights or the queries...
 
 ## Credits
 
