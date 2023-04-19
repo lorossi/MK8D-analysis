@@ -55,8 +55,12 @@ def find(parameters: argparse.Namespace) -> None:
     # or the best builds can be computed via the BNL algorithm (for skyline queries,
     # check the readme for more info)
 
-    if parameters.dominating:
-        builds = m.dominating_named_builds
+    if parameters.skyline_bln:
+        builds = m.skyline_named_builds_bln
+    elif parameters.skyline_sfs:
+        builds = m.skyline_named_builds_sfs
+    elif parameters.k_means:
+        builds = m.k_means_named_builds
     elif parameters.score:
         builds = m.scored_named_builds
 
@@ -155,9 +159,21 @@ def main():
     )
 
     algorithm_parser.add_argument(
-        "--dominating",
+        "--skyline-bln",
         action="store_true",
         help="Find the builds according to the BNL algorithm.",
+    )
+
+    algorithm_parser.add_argument(
+        "--skyline-sfs",
+        action="store_true",
+        help="Find the builds according to the SFS algorithm.",
+    )
+
+    algorithm_parser.add_argument(
+        "--k-means",
+        action="store_true",
+        help="Find the builds according to the K-Means algorithm.",
     )
 
     # parser group for query parameters
