@@ -55,8 +55,8 @@ def find(parameters: argparse.Namespace) -> None:
     # or the best builds can be computed via the BNL algorithm (for skyline queries,
     # check the readme for more info)
 
-    if parameters.score:
-        m.algorithm = "score"
+    if parameters.topk:
+        m.algorithm = "topk"
     elif parameters.skyline:
         m.algorithm = "skyline"
     elif parameters.kmeans:
@@ -152,10 +152,10 @@ def main():
     # parser group for query algorithm
     algorithm_parser = query_parser.add_mutually_exclusive_group(required=False)
     algorithm_parser.add_argument(
-        "--score",
+        "--topk",
         action="store_true",
         default=True,
-        help="Find the builds according to their scores (default).",
+        help="Find the builds according to their topks (default).",
     )
 
     algorithm_parser.add_argument(

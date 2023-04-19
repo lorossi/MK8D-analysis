@@ -17,9 +17,8 @@ class Algorithms:
             Algorithms
         """
         self._algorithms = {
-            "score": self._score,
-            "skyline": self._skyline,
             "topk": self._topk,
+            "skyline": self._skyline,
             "kmeans": self._kmeans,
             "medrank": self._medrank,
         }
@@ -51,7 +50,7 @@ class Algorithms:
 
         return self._current_algorithm(builds, **kwargs)
 
-    def _score(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
+    def _topk(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
         for f in kwargs["sort"][::-1]:
             builds.sort(key=lambda x: x.__getattribute__(f[0]), reverse=f[1])
 
@@ -70,9 +69,6 @@ class Algorithms:
             w.add(p)
 
         return list(w)
-
-    def _topk(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
-        raise NotImplementedError
 
     def _kmeans(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
         if seed := kwargs.get("seed") is None:
