@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from statistics import stdev
 from math import sqrt
+from statistics import stdev
 
 from ujson import dumps
 
@@ -212,16 +212,16 @@ class NamedBuild:
             self.__setattr__(k, v)
 
     def __str__(self) -> str:
-        """Return the string representation of the named build.
-
-        Returns:
-            str
-        """
+        """Return the string representation of the named build."""
         return (
             f"{self.__class__.__name__}("
             + ", ".join(f"{k}={v}" for k, v in self.attributes.items())
             + ")"
         )
+
+    def __repr__(self) -> str:
+        """Return the string representation of the named build."""
+        return self.__str__()
 
     def __eq__(self, __value: object) -> bool:
         """Dunder method for the equality of two named builds.

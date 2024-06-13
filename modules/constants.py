@@ -1,4 +1,5 @@
 """Module containing constants for the project."""
+
 from enum import Enum
 
 
@@ -16,6 +17,7 @@ class EntityId(Enum):
     BUILD = "build"
 
 
+# Name of the tables in the database
 TABLE_NAMES = {
     EntityId.DRIVER: "drivers",
     EntityId.VEHICLE: "vehicles",
@@ -24,6 +26,7 @@ TABLE_NAMES = {
     EntityId.BUILD: "builds",
 }
 
+# Name of the columns in the database
 PARTS_ATTRIBUTES = [
     "ground_speed",
     "water_speed",
@@ -38,12 +41,15 @@ PARTS_ATTRIBUTES = [
     "miniturbo",
     "on_road_traction",
     "off_road_traction",
+    "invincibility",
 ]
 
+# ID-related attributes
 ID_ATTRIBUTES = ["driver_id", "vehicle_id", "tyre_id", "glider_id"]
-
+# Score-related attributes
 DATA_ATTRIBUTES = ["score", "score_dev"]
 
+# Attributes for the CSV files
 CSV_ATTRIBUTES = {
     "id": "id",
     "name": "name",
@@ -60,4 +66,5 @@ CSV_ATTRIBUTES = {
     "TW": "water_handling",
     "TA": "antigravity_handling",
     "TG": "air_handling",
+    "IV": "invincibility",
 }

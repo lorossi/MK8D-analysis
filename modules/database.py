@@ -1,4 +1,5 @@
 """This module contains the Database class and all its subclasses."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -12,12 +13,7 @@ from .constants import (
     TABLE_NAMES,
     EntityId,
 )
-from .entities import (
-    Build,
-    Entity,
-    NamedBuild,
-    PartFactory,
-)
+from .entities import Build, Entity, NamedBuild, PartFactory
 
 
 class Database:
@@ -426,7 +422,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
             sort=self._sort,
             limit=self._limit,
             weight=self._weights,
-            rank_attribute=self._rank_attributes,
+            rank_attributes=self._rank_attributes,
         )
         return self._returnBuilds(sorted_builds)
 
