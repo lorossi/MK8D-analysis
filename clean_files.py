@@ -130,9 +130,9 @@ def merge_lines(lines: list[str]) -> tuple[list[str], list[str]]:
     merged_lines = []
     current_id = 0
     for stats, names in merged.items():
-        merged_lines.append(f"{current_id},{stats}")
+        merged_lines.append(f"{current_id:>02},{stats}")
         for name in names:
-            ids.append(f"{name},{current_id}")
+            ids.append(f"{name},{current_id:>02}")
         current_id += 1
 
     merged_lines.sort()
