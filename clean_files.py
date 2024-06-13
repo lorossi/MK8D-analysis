@@ -1,10 +1,11 @@
 """This script cleans the files in the dirty folder and outputs them \
     to the clean folder, creating a sql database in the process."""
+
 import re
 from glob import glob
 
 import modules.constants as constants
-from modules.database import Database
+from modules.database import MK8Deluxe
 
 
 def open_file(path: str) -> list[str]:
@@ -65,6 +66,7 @@ def clean_drivers(lines: list) -> list[str]:
 
     clean_lines = []
 
+    max_attributes = len(constants.CSV_ATTRIBUTES.keys()) - 2
     x = 0
     while x < len(lines):
         if "head icon" in lines[x].lower():
@@ -82,8 +84,8 @@ def clean_drivers(lines: list) -> list[str]:
             x += 1
 
         raw_stats = re.findall(r"\d+", stats_line)
-        if len(raw_stats) > 13:
-            stats = ",".join(raw_stats[len(raw_stats) - 13 :])
+        if len(raw_stats) > max_attributes:
+            stats = ",".join(raw_stats[len(raw_stats) - max_attributes :])
         else:
             stats = ",".join(raw_stats)
 
@@ -187,7 +189,7 @@ def add_to_database(lines: list[str], table: str) -> None:
     Returns:
         None
     """
-    d = Database("MK8D")
+    d = MK8Deluxe()
     # if the table exists, delete it
     if d.tableExists(table):
         d.deleteTable(table)
