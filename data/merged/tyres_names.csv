@@ -1,10 +1,8 @@
 name,id
 Normal,0
 Normal Blue,0
-GLA Wheels,0
 Monster,1
 Funky Monster,1
-Ancient Tyres,1
 Roller,2
 Azure Roller,2
 Slim,3
@@ -13,11 +11,13 @@ Crimson Slim,3
 Slick,4
 Cyber Slick,4
 Metal,5
-Gold Wheels,5
 Button,6
 Leaf Tyres,6
 Off-Road,7
 Retro Off-Road,7
-Triforce Tyres,7
 Sponge,8
-Cushion,8
+Cushion,9
+Gold Wheels,10
+GLA Wheels,11
+Triforce Tyres,12
+Ancient Tyres,13
