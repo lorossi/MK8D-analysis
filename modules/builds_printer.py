@@ -1,45 +1,12 @@
 """Builds Printer Module."""
-from abc import ABC
+
+import tomllib
 
 from .entities import NamedBuild
 
 
-class AbstractPrinter(ABC):
-    """Base class for printers."""
-
-    @classmethod
-    def print(cls, named_builds: list[NamedBuild]) -> None:
-        """Print the builds as plaintext."""
-        raise NotImplementedError
-
-    @classmethod
-    def printCSV(cls, named_builds: list[NamedBuild]) -> None:
-        """Print the builds as CSV."""
-        raise NotImplementedError
-
-    @classmethod
-    def printJSON(cls, named_builds: list[NamedBuild]) -> None:
-        """Print the builds as JSON."""
-        raise NotImplementedError
-
-    @classmethod
-    def printJSONPretty(cls, named_builds: list[NamedBuild]) -> None:
-        """Print the builds as pretty JSON."""
-        raise NotImplementedError
-
-    @classmethod
-    def printMarkdown(cls, named_builds: list[NamedBuild]) -> None:
-        """Print the builds as Markdown table."""
-        raise NotImplementedError
-
-    @classmethod
-    def printTOML(cls, named_builds: list[NamedBuild]) -> None:
-        """Print the builds as TOML."""
-        raise NotImplementedError
-
-
-class BuildsPrinter(AbstractPrinter):
-    """Class for printing builds, extends AbstractPrinter."""
+class BuildsPrinter:
+    """Class for printing builds."""
 
     @classmethod
     def printCSV(cls, named_builds: list[NamedBuild]) -> None:
@@ -82,6 +49,15 @@ class BuildsPrinter(AbstractPrinter):
             if x == 0:
                 print(b.markdownHeader())
             print(b.markdown)
+
+    @classmethod
+    def printTOML(cls, named_builds: list[NamedBuild]) -> None:
+        """Print the builds as TOML.
+
+        Args:
+            named_builds (list[NamedBuild])
+        """
+        print(tomllib.dumps([b.toDict() for b in named_builds]))
 
     @classmethod
     def getPrinters(cls) -> dict[str, callable]:
