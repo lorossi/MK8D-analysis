@@ -1,22 +1,22 @@
 name,id
-Normal,0
-Normal Blue,0
-Monster,1
-Funky Monster,1
-Roller,2
-Azure Roller,2
-Slim,3
-Wooden,3
-Crimson Slim,3
-Slick,4
-Cyber Slick,4
-Metal,5
-Button,6
-Leaf Tyres,6
-Off-Road,7
-Retro Off-Road,7
-Sponge,8
-Cushion,9
+Normal,00
+Normal Blue,00
+Monster,01
+Funky Monster,01
+Roller,02
+Azure Roller,02
+Slim,03
+Wooden,03
+Crimson Slim,03
+Slick,04
+Cyber Slick,04
+Metal,05
+Button,06
+Leaf Tyres,06
+Off-Road,07
+Retro Off-Road,07
+Sponge,08
+Cushion,09
 Gold Wheels,10
 GLA Wheels,11
 Triforce Tyres,12
