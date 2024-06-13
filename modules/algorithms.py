@@ -1,8 +1,9 @@
 """This module contains the algorithms used to rank builds."""
+
 from __future__ import annotations
 
 import random
-from datetime import datetime
+from time import time
 
 from modules.entities import NamedBuild
 
@@ -60,7 +61,7 @@ class Algorithms:
         return builds
 
     def _skyline(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
-        attributes = [k for k, v in kwargs["rank_attributes"].items() if v is True]
+        attributes = [k for k, v in kwargs["rank_attributes"].items() if v]
         w: set[NamedBuild] = set()
 
         for p in builds:
@@ -71,15 +72,12 @@ class Algorithms:
         return list(w)
 
     def _kmeans(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
-        if seed := kwargs.get("seed") is None:
-            seed = datetime.now()
-
-        if limit := kwargs.get("limit") is None:
-            limit = 5
+        seed = kwargs.get("seed", time())
+        limit = kwargs.get("limit", 5)
 
         random.seed(seed)
 
-        attributes = [k for k, v in kwargs["rank_attributes"] if v is True]
+        attributes = [k for k, v in kwargs["rank_attributes"].items() if v]
         centroids = random.sample(builds, limit)
 
         while True:
@@ -96,10 +94,8 @@ class Algorithms:
         return centroids
 
     def _medrank(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
-        if limit := kwargs.get("limit") is None:
-            limit = 5
-
-        attributes = [k for k, v in kwargs["rank_attributes"] if v is True]
+        limit = kwargs.get("limit", 5)
+        attributes = [k for k, v in kwargs["rank_attributes"].items() if v]
         lists = [[] for _ in range(len(attributes))]
         sorted_builds = []
 
