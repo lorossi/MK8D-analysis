@@ -3,6 +3,7 @@ as they are saved in the database.
 
 The class offers the ability to sort, filter and score each of them.
 """
+
 import argparse
 
 from modules.builds_printer import BuildsPrinter
@@ -52,9 +53,8 @@ def find(parameters: argparse.Namespace) -> None:
     m.limit = parameters.limit
 
     # builds can be either be scored (and then accessed via m.scored_named_builds)
-    # or the best builds can be computed via the BNL algorithm (for skyline queries,
-    # check the readme for more info)
-
+    # or the best builds can be computed via the various implemented algorithms
+    # (skyline, topk, kmeans, medrank)
     if parameters.topk:
         m.algorithm = "topk"
     elif parameters.skyline:
@@ -116,11 +116,8 @@ def main():
         help="List the available ranking attributes.",
     )
 
-    # parser group for query options
-    query_parser = parser.add_argument_group("Query options")
-
     # parser group for mode output
-    output_parser = query_parser.add_mutually_exclusive_group(required=False)
+    output_parser = parser.add_mutually_exclusive_group(required=False)
     output_parser.add_argument(
         "--csv",
         action="store_true",
@@ -152,7 +149,7 @@ def main():
     )
 
     # parser group for query algorithm
-    algorithm_parser = query_parser.add_mutually_exclusive_group(required=False)
+    algorithm_parser = parser.add_mutually_exclusive_group(required=False)
     algorithm_parser.add_argument(
         "--topk",
         action="store_true",
@@ -178,7 +175,7 @@ def main():
     )
 
     # parser group for query parameters
-    parameters_parser = query_parser.add_argument_group("Query parameters")
+    parameters_parser = parser.add_argument_group("Query parameters")
     parameters_parser.add_argument(
         "--limit",
         type=int,
