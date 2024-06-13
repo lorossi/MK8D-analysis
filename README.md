@@ -1,8 +1,6 @@
 # MK8D-analysis
 
-Query: python3 find_builds.py --dominating --limit 10  --markdown --query-filters min_ground_speed=10 min_acceleration=10 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 sort_ground_handling=-1
-
-I have been playing the new Mario Kart on the Nintendo Switch for about a year.
+At the time of updating this readme, I have been playing the new Mario Kart on the Nintendo Switch for more than two years.
 The peculiarity of this game, a new feature introduced in this iteration, is the high level of customization of the karts and the bikes.
 Before playing a Grand Prix, either locally or online, the player must choose:
 
@@ -13,12 +11,12 @@ Before playing a Grand Prix, either locally or online, the player must choose:
 
 each of them with 6 visible stats *(ground speed, acceleration, weight, handling, traction, mini turbo)* and 6 more hidden stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling)*.
 
-The question that soon arose was: how do I choose a setup (character, kart, tyres, glider) that is the best?
+The question that soon arose was: how can I choose a build (character, kart, tyres, glider) that is the best?
 *It is possible to finally defeat the superior Japanese players in the 200cc category?*
 
 ## The data
 
-All the data has been gathered from the [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe).
+All the data has been gathered from the [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe_in-game_statistics).
 
 I soon found that not each entity is unique;
 up to 4 karts, characters, tyres and gliders can share the same stats.
@@ -101,14 +99,13 @@ So I tweaked the weights and the filters, finally setting:
 
 The top 5 builds, sorted by *score* and the *standard deviation* of the stats, are the following:
 
-| score |     score_dev     |  id   | ground_speed | water_speed | air_speed | antigravity_speed | acceleration | weight | ground_handling | water_handling | air_handling | antigravity_handling | miniturbo | on_road_traction | off_road_traction |          driver           |                   vehicle                   |         tyre         |                        glider                        |
-| :---: | :---------------: | :---: | :----------: | :---------: | :-------: | :---------------: | :----------: | :----: | :-------------: | :------------: | :----------: | :------------------: | :-------: | :--------------: | :---------------: | :-----------------------: | :-----------------------------------------: | :------------------: | :--------------------------------------------------: |
-| 13.9  | 2.811286775363434 | 6057  |      12      |     16      |    16     |        13         |      13      |   10   |       10        |       8        |      11      |          10          |    14     |        14        |         8         | Donkey Kong, Waluigi, Roy |  Standard Kart, The Duke, 300 SL Roadster   | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
-| 13.9  | 2.811286775363434 | 6059  |      12      |     15      |    16     |        13         |      13      |   11   |       10        |       9        |      11      |          9           |    14     |        15        |         7         | Donkey Kong, Waluigi, Roy |  Standard Kart, The Duke, 300 SL Roadster   | Roller, Azure Roller | Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil  |
-| 13.9  | 2.811286775363434 | 6200  |      12      |     15      |    18     |        12         |      13      |   11   |       11        |       8        |      11      |          10          |    14     |        15        |         8         | Donkey Kong, Waluigi, Roy | Cat Cruiser, Comet, Yoshi Bike, Teddy Buggy | Roller, Azure Roller |        Super Glider, Waddle Wing, Hylian Kite        |
-| 13.9  | 2.811286775363434 | 6202  |      12      |     14      |    18     |        13         |      13      |   12   |       11        |       9        |      11      |          9           |    14     |        16        |         7         | Donkey Kong, Waluigi, Roy | Cat Cruiser, Comet, Yoshi Bike, Teddy Buggy | Roller, Azure Roller |  Wario Wing, Plane Glider, Gold Glider, Paraglider   |
-| 13.9  | 2.811286775363434 | 6217  |      12      |     14      |    16     |        15         |      13      |   10   |       10        |       7        |      10      |          10          |    14     |        16        |         7         | Donkey Kong, Waluigi, Roy | Cat Cruiser, Comet, Yoshi Bike, Teddy Buggy |  Button, Leaf Tyres  | Cloud Glider, Parachute, Flower Glider, Paper Glider |
-
+|score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 14.4 | 2.986636904613616 | 9137 | 12 | 17 | 15 | 12 | 14 | 11 | 10 | 8 | 8 | 9 | 14 | 10 | 9 | 9 | Bowser, Morton | Pipe Frame | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 14.4 | 2.986636904613616 | 9139 | 12 | 16 | 15 | 12 | 14 | 12 | 10 | 9 | 8 | 8 | 14 | 11 | 8 | 9 | Bowser, Morton | Pipe Frame | Roller, Azure Roller | Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil |
+| 14.4 | 2.986636904613616 | 9585 | 12 | 19 | 16 | 11 | 14 | 10 | 9 | 9 | 9 | 7 | 14 | 7 | 11 | 8 | Bowser, Morton | Landship | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 14.4 | 2.986636904613616 | 9587 | 12 | 18 | 16 | 11 | 14 | 11 | 9 | 10 | 9 | 6 | 14 | 8 | 10 | 8 | Bowser, Morton | Landship | Roller, Azure Roller | Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil |
+| 14.4 | 2.986636904613616 | 9921 | 12 | 17 | 15 | 12 | 14 | 11 | 10 | 8 | 8 | 9 | 14 | 10 | 9 | 8 | Bowser, Morton | Varmint, City Tripper | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
 
 The command used to generate this table is:
 
@@ -117,22 +114,22 @@ python3 find_builds.py  --limit 5 --topk --query-filters min_ground_speed=12 min
 
 ```
 
-According to the results, the best build is the one with the following stats:
+According to the results, the best build is the one with the following build:
 
-- **Driver**: Donkey Kong, Waluigi, Roy
-- **Vehicle**: Standard Kart, The Duke, 300 SL Roadster
+- **Driver**: Bowser, Morton
+- **Vehicle**: Pipe Frame
 - **Tyre**: Roller, Azure Roller
 - **Glider**: Cloud Glider, Parachute, Flower Glider, Paper Glider
 
 Yielding the following stats:
 
 - **Ground speed**: 12
-- **Acceleration**: 13
+- **Acceleration**: 14
 - **Miniturbo**: 14
-- **Weight**: 10
+- **Weight**: 11
 - **Ground handling**: 10
 
-With a score of 13.9 and a standard deviation of 2.81.
+With a score of 14.4 and a standard deviation of 2.99.
 
 I played a bit with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
@@ -162,6 +159,29 @@ The command to use this algorithm is:
 python3 find_builds.py  --limit 5 --medrank --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --query-sort sort_ground_speed=-1 sort_score_dev=-1 --markdown
 ```
 
+|score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0 | 0 | 672 | 12 | 13 | 15 | 13 | 12 | 10 | 12 | 10 | 11 | 12 | 13 | 10 | 13 | 12 | Mario, Ludwig, Mii (medium) | Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow | Normal, Normal Blue | Super Glider, Waddle Wing, Hylian Kite |
+| 0 | 0 | 674 | 12 | 12 | 15 | 14 | 12 | 11 | 12 | 11 | 11 | 11 | 13 | 11 | 12 | 12 | Mario, Ludwig, Mii (medium) | Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow | Normal, Normal Blue | Wario Wing, Plane Glider, Gold Glider, Paraglider |
+| 0 | 0 | 701 | 12 | 14 | 12 | 14 | 12 | 10 | 10 | 8 | 11 | 11 | 13 | 11 | 14 | 13 | Mario, Ludwig, Mii (medium) | Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow | Off-Road, Retro Off-Road | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 703 | 12 | 13 | 12 | 14 | 12 | 11 | 10 | 9 | 11 | 10 | 13 | 12 | 13 | 13 | Mario, Ludwig, Mii (medium) | Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow | Off-Road, Retro Off-Road | Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil |
+| 0 | 0 | 716 | 12 | 13 | 15 | 13 | 12 | 10 | 12 | 10 | 11 | 12 | 13 | 10 | 13 | 13 | Mario, Ludwig, Mii (medium) | Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow | GLA Wheels | Super Glider, Waddle Wing, Hylian Kite |
+
+The best build according to the Medrank algorithm is the one with the following build:
+
+- **Driver**: Mario, Ludwig, Mii (medium)
+- **Vehicle**: Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow
+- **Tyre**: Normal, Normal Blue
+- **Glider**: Super Glider, Waddle Wing, Hylian Kite
+
+Yielding the following stats:
+
+- **Ground speed**: 12
+- **Acceleration**: 12
+- **Miniturbo**: 13
+- **Weight**: 10
+- **Ground handling**: 12
+
 ### Skyline algorithm
 
 The skyline algorithm provides a way to find the best build according to a set of parameters.
@@ -179,6 +199,29 @@ The command to use this algorithm is:
 python3 find_builds.py --limit 5 --skyline --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
 ```
 
+|score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0 | 0 | 11113 | 12 | 17 | 14 | 12 | 14 | 8 | 10 | 10 | 9 | 9 | 14 | 12 | 10 | 9 | Donkey Kong, Waluigi, Roy, Wiggler | Landship | Button, Leaf Tyres | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 12609 | 12 | 19 | 16 | 11 | 14 | 9 | 10 | 10 | 10 | 8 | 14 | 6 | 12 | 7 | Wario, Dry Bowser, Funky Kong | Landship | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 9137 | 12 | 17 | 15 | 12 | 14 | 11 | 10 | 8 | 8 | 9 | 14 | 10 | 9 | 9 | Bowser, Morton | Pipe Frame | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 13337 | 12 | 19 | 16 | 11 | 14 | 9 | 10 | 10 | 10 | 8 | 14 | 6 | 12 | 8 | Wario, Dry Bowser, Funky Kong | Streetle | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 11841 | 12 | 17 | 14 | 12 | 14 | 8 | 10 | 10 | 9 | 9 | 14 | 12 | 10 | 10 | Donkey Kong, Waluigi, Roy, Wiggler | Streetle | Button, Leaf Tyres | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+
+The best build according to the Skyline algorithm is the one with the following build:
+
+- **Driver**: Donkey Kong, Waluigi, Roy, Wiggler
+- **Vehicle**: Landship
+- **Tyre**: Button, Leaf Tyres
+- **Glider**: Cloud Glider, Parachute, Flower Glider, Paper Glider
+
+Yielding the following stats:
+
+- **Ground speed**: 12
+- **Acceleration**: 14
+- **Miniturbo**: 14
+- **Weight**: 8
+- **Ground handling**: 10
+
 ### Kmeans algorithm
 
 The kmeans algorithm is a clustering algorithm that allows to group the builds according to their stats.
@@ -189,8 +232,31 @@ This ensures that the centroid is the most balanced build in the cluster, but it
 The command to use this algorithm is:
 
 ```bash
-python3 find_builds.py --limit 5 --kmeans --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+python3 find_builds.py --limit 5 --k-means --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
 ```
+
+|score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0 | 0 | 9129 | 14 | 17 | 15 | 14 | 12 | 13 | 9 | 7 | 7 | 8 | 12 | 12 | 10 | 13 | Bowser, Morton | Pipe Frame | Normal, Normal Blue | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 84 | 13 | 15 | 11 | 10 | 12 | 11 | 11 | 9 | 9 | 11 | 13 | 11 | 13 | 13 | Mario, Ludwig, Mii (medium) | Pipe Frame | Off-Road, Retro Off-Road | Super Glider, Waddle Wing, Hylian Kite |
+| 0 | 0 | 84 | 13 | 15 | 11 | 10 | 12 | 11 | 11 | 9 | 9 | 11 | 13 | 11 | 13 | 13 | Mario, Ludwig, Mii (medium) | Pipe Frame | Off-Road, Retro Off-Road | Super Glider, Waddle Wing, Hylian Kite |
+| 0 | 0 | 1 | 12 | 14 | 14 | 13 | 12 | 10 | 11 | 9 | 12 | 11 | 14 | 10 | 11 | 10 | Mario, Ludwig, Mii (medium) | Standard Kart, The Duke | Normal, Normal Blue | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| 0 | 0 | 1 | 12 | 14 | 14 | 13 | 12 | 10 | 11 | 9 | 12 | 11 | 14 | 10 | 11 | 10 | Mario, Ludwig, Mii (medium) | Standard Kart, The Duke | Normal, Normal Blue | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+
+The best build according to the Kmeans algorithm is the one with the following build:
+
+- **Driver**: Bowser, Morton
+- **Vehicle**: Pipe Frame
+- **Tyre**: Normal, Normal Blue
+- **Glider**: Cloud Glider, Parachute, Flower Glider, Paper Glider
+
+Yielding the following stats:
+
+- **Ground speed**: 14
+- **Acceleration**: 12
+- **Miniturbo**: 12
+- **Weight**: 13
+- **Ground handling**: 9
 
 ## The code
 
@@ -213,12 +279,12 @@ In the foreseeable future, I plan to add:
 
 - Tests *(I know, I know)*
 - A simple web interface, to make the data more accessible to everyone
-- Some way of automating the process of finding the best builds
-  - if only Nintendo shared some stats about the multiplayer way, I could find a way to auto-generate the weights or the queries...
+- A more informed and sensible way to set the weights and the filters
+  - I could even try to simulate the circuits
 
 ## Credits
 
 - [Mario Kart 8 Deluxe](https://www.nintendo.com/games/detail/mario-kart-8-deluxe-switch/) for being such a great game
-- [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe) for the stats
+- [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe_in-game_statistics) for the stats
 
 The code is distributed under the MIT license.
