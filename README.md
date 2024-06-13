@@ -1,34 +1,52 @@
 # MK8D-analysis
 
+**TL:DR**: algorithm to find the best build in Mario Kart 8 Deluxe. Results: varying, but these builds looks good:
+
+| Driver | Vehicle | Tyre | Glider |
+|:---:|:---:|:---:|:---:|
+| Bowser, Morton | Pipe Frame | Roller, Azure Roller | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| Mario, Ludwig, Mii (medium) | Standard Bike, Flame Rider, Wild Wiggler, W 25 Silver Arrow | Normal, Normal Blue | Super Glider, Waddle Wing, Hylian Kite |
+| Donkey Kong, Waluigi, Roy, Wiggler | Landship | Button, Leaf Tyres | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+| Bowser, Morton | Pipe Frame | Normal, Normal Blue | Cloud Glider, Parachute, Flower Glider, Paper Glider |
+
+---
+
 At the time of updating this readme, I have been playing the new Mario Kart on the Nintendo Switch for more than two years.
-The peculiarity of this game, a new feature introduced in this iteration, is the high level of customization of the karts and the bikes.
-Before playing a Grand Prix, either locally or online, the player must choose:
+It's a great game, and I love it.
+
+The only downside is that I got dragged into the competitive aspect of it, and I'm not that good.
+
+The peculiarity of this game and a new feature introduced in this iteration, is the high level of customization of the karts and the bikes.
+Before playing a Grand Prix, either locally or online, the player must create a build, choosing:
 
 - A **character**
 - A **bike** or a **kart**
 - The **tyres**
 - The **glider**
 
-each of them with 6 visible stats *(ground speed, acceleration, weight, handling, traction, mini turbo)* and 6 more hidden stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling)*.
+each of them with 6 **visible** stats *(ground speed, acceleration, weight, handling, traction, mini turbo)* and 6 more **hidden** stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling)*.
 
-The question that soon arose was: how can I choose a build (character, kart, tyres, glider) that is the best?
+The question that soon arose was: how can I choose a build *(character, kart, tyres, glider)* that is the best?
 *It is possible to finally defeat the superior Japanese players in the 200cc category?*
 
 ## The data
 
-All the data has been gathered from the [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe_in-game_statistics).
+All the data has been gathered from the [this page](https://www.mariowiki.com/Mario_Kart_8_Deluxe_in-game_statistics) of the [Mario Kart 8 Deluxe Wiki](https://www.mariowiki.com/).
 
-I soon found that not each entity is unique;
-up to 4 karts, characters, tyres and gliders can share the same stats.
-For example, the characters *Waluigi*, *Donkey Kong* and *Roy Koopa* all share the same stats; the same goes for the karts *Streetle* and the *Landship*.
-To reduce the size of the database *(and somehow make the data more manageable)*, I grouped the entities that share the same stats, by giving them a shared id.
-One more table, linking the entity id to their relative names, was needed.
+To obtain it, I simply selected the tables in the browser, later pasting them as `.csv` files in the `data/dirty` folder.
 
 ### Cleaning the data
 
-The data (found as `.csv` files in the `data/dirty` folder) cannot be handled as-is by the program.
+I soon found that not each entity is unique;
+up to 4 karts, characters, tyres and gliders can share the same stats.
 
-So this is where the `clean_files.py` comes in. It:
+For example, the characters *Waluigi*, *Donkey Kong* and *Roy Koopa* all share the same stats;
+the same goes for the karts *Streetle* and the *Landship*.
+
+To reduce the size of the database *(and somehow make the data more manageable)*, I grouped the entities that share the same stats, by giving them a common id.
+One more table, linking the entity id to their relative names, was needed.
+
+In order to clean the messy data in the tables, the script `clean_files.py` comes in. It:
 
 1. Loads all the files in the `data/dirty` folder
 2. Cleans the rows, removing redundant lines and superfluous details
@@ -37,43 +55,55 @@ So this is where the `clean_files.py` comes in. It:
 
 This is where the `MK8D` sqlite database is created.
 
-I chose to use `sqlite` because it allows one to easily query the data via `SQL`; while not being a language that I particularly like, I figured out that it would have made my life easier in this case.
+I chose to use `sqlite` because it allows one to easily query the data via `SQL`;
+while not being a language that I particularly like, I figured out that it would have made my life easier in this case.
 The other option was to use a no-SQL database, like `MongoDB`, but I figured that making queries would be more difficult.
 
-## The analysis
+### The analysis
 
 This is where things got complicated.
 
-All the data was in a database; now I needed to extract it.
+All the data is in a database; all it's needed is to query it and find the best build.
 
 Only recently I found out the power of Python dunder ~~mifflin~~ methods, and I decided to use them.
 *Operators overriding? Count me in!*
 
-I quickly discarded `dataclasses`, as they are not meant to be used as containers for data, but rather as a way to represent data; due to my love of reinventing the wheel, I created a new `Entity` class, better suited for my needs.
+I quickly discarded `dataclasses`, as they are not meant to be used as containers for data, but rather as a way to represent data;
+due to my love of reinventing the wheel, I created a new `Entity` class, better suited for my needs.
 
 ### Create builds
 
 The script `create_builds.py` loads all the entities from the database via the `MK8Deluxe` class, a wrapper around the `sqlite3` module.
 Via the aforementioned dunder methods, the single entities loaded are then added together, creating an instance of the `Build` class.
+The builds are then saved into another `sqlite` database and inside a *(pretty big)* `csv` file to be used later.
 
-The builds are then saved into another `sqlite` database and inside a (pretty big) `csv` file to be used later.
+As a result, *25705* unique builds are created.
 
 ### Find builds
 
-The script `find_builds.py` loads all the created builds in the previous step and filters them according to the user's needs, thanks to the `MK8DeluxeBuilds` class.
-To do so, the script:
+The script `find_builds.py` loads all the builds obtained in the previous step and filters them according to the user's needs, thanks to the `MK8DeluxeBuilds` class.
+To do so, the script accepts the following arguments:
 
-- Accepts a minimum and maximum value for each stat
-- Computes a score for each build, according to some custom weights
-- Sorts the builds in an order according to the user's needs
-- Limits the number of builds to be shown
+- `--topk`, `--medrank`, `--skyline`, `--k-means` to select the algorithm to use
+- `--csv`, `--json`, `--json-pretty`, `--markdown`, `--toml` to select the output format
+- `--limit` to select the number of builds to show
+- `--query-filters` to select the filters to apply to the builds
+- `--query-weights` to select the weights to apply to the stats *(only for the top-k algorithm)*
+- `--query-sort` to select the sort order of the builds
+- `--ranking-attributes` to select the attributes to rank the builds *(only for medrank, skyline, and kmeans algorithms)*
 
-The part relative to the sorting is implemented via an algorithm called `top-k`.
+To sort the best results, 4 algorithms are implemented:
+
+- The **top-k** algorithm, which returns the top-k builds according to the weights and the filters set by the user
+- The **medrank** algorithm, which returns the builds that are better than the median of the stats
+- The **skyline** algorithm, which returns the builds that are better than the other builds in at least one of the stats
+- The **kmeans** algorithm, which returns the centroids of the clusters of builds
+
 All the entities manipulations are done via dunder methods, which makes the code very readable *(I hope)* as it reduces the overall verbosity and makes the code more compact.
 
 The output of the script can be either printed to the console "raw" *(in a human-readable format)*, `json`, `csv`, table formatted in `markdown`, or `toml` format.
 
-## The results
+## The results - top-k algorithm
 
 Now the hard part is setting custom weights and filters.
 How is it possible to balance the stats in order to get the best build?
@@ -97,7 +127,7 @@ So I tweaked the weights and the filters, finally setting:
 - **Acceleration** weight to 0.5
 - **Miniturbo** weight to 0.1
 
-The top 5 builds, sorted by *score* and the *standard deviation* of the stats, are the following:
+The top 5 builds, selected via top-k algorithm, sorted by *score* and the *standard deviation* of the stats, are the following:
 
 |score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -110,8 +140,11 @@ The top 5 builds, sorted by *score* and the *standard deviation* of the stats, a
 The command used to generate this table is:
 
 ```bash
-python3 find_builds.py  --limit 5 --topk --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-weights weight_ground_speed=0.5 weight_acceleration=0.5 weight_miniturbo=0.1 --query-sort sort_score=-1 sort_score_dev=-1 --markdown
-
+python3 find_builds.py  --limit 5 --topk \
+  --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
+  --query-weights weight_ground_speed=0.5 weight_acceleration=0.5 weight_miniturbo=0.1 \
+  --query-sort sort_score=-1 sort_score_dev=-1 \
+  --markdown
 ```
 
 According to the results, the best build is the one with the following build:
@@ -129,16 +162,18 @@ Yielding the following stats:
 - **Weight**: 11
 - **Ground handling**: 10
 
-With a score of 14.4 and a standard deviation of 2.99.
+With a score of $14.4$ and a standard deviation of $2.99$.
 
 I played a bit with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
 Due to the high score in drifting, I recommend drifting *EVERYWHERE*, even on straight lines, as it will help you to get a good speed up.
 
-## Alternative, better, solutions
+However, I needed a better approach to this problem.
+
+## Alternative, better, solutions - other algorithms
 
 Finding the correct weights is however a bit tricky: it's hard to find the "best" build according to parameters that are not well defined.
-This is why other algorithms (such as the skyline algorithm) have been created.
+This is why other algorithms *(such as the skyline algorithm)* have been created.
 
 I decided to implement $3$ of them:
 
@@ -156,7 +191,11 @@ It works by comparing the stats of the builds to the median of the stats of all 
 The command to use this algorithm is:
 
 ```bash
-python3 find_builds.py  --limit 5 --medrank --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --query-sort sort_ground_speed=-1 sort_score_dev=-1 --markdown
+python3 find_builds.py --limit 5 --medrank \
+  --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
+  --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 \
+  --query-sort sort_ground_speed=-1 sort_score_dev=-1 \
+  --markdown
 ```
 
 |score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
@@ -196,7 +235,11 @@ this ensures that the builds returned are the best in some way, but not necessar
 The command to use this algorithm is:
 
 ```bash
-python3 find_builds.py --limit 5 --skyline --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+python3 find_builds.py --limit 5 --skyline \
+  --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
+  --query-sort sort_acceleration=-1 sort_ground_speed=-1 \
+  --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 \
+  --markdown
 ```
 
 |score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
@@ -232,7 +275,11 @@ This ensures that the centroid is the most balanced build in the cluster, but it
 The command to use this algorithm is:
 
 ```bash
-python3 find_builds.py --limit 5 --k-means --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 --query-sort sort_acceleration=-1 sort_ground_speed=-1 --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 --markdown
+python3 find_builds.py --limit 5 --k-means \
+  --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
+  --query-sort sort_acceleration=-1 sort_ground_speed=-1 \
+  --ranking-attributes rank_ground_speed=1 rank_miniturbo=1 \
+  --markdown
 ```
 
 |score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
@@ -263,12 +310,6 @@ Yielding the following stats:
 The code used to create builds is all found in the `find_builds.py` file, while the code used to create the builds is in the `create_builds.py` file.
 In order to create the builds, you must run first the latter, then the former.
 A database containing the builds will be created in the main folder of the script.
-
-`find_builds.py` accepts the following arguments:
-
-- `--csv` to output the builds in a csv format
-- `--json` and `--json-pretty` to output the builds in a json format
-- `--markdown` to output the builds in a markdown table format
 
 The minimum and maximum values, the sort order, the weights and the number of builds to be shown can be passed as attributes to the `MK8DeluxeBuilds` class.
 A list of available filters, sort orders, and weights can be found respectively in the `available_filters`, `available_sort_orders` and `available_weights` attributes of the `MK8DeluxeBuilds` class.
