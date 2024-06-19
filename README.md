@@ -1,6 +1,6 @@
 # MK8D-analysis
 
-**TL:DR**: algorithm to find the best build in Mario Kart 8 Deluxe. Results: varying, but these builds looks good:
+**TL:DR**: algorithm to find the best builds in Mario Kart 8 Deluxe, with all the DLCs on Nintendo Switch. **Results are varying**, but these builds looks good:
 
 | Driver | Vehicle | Tyre | Glider |
 |:---:|:---:|:---:|:---:|
@@ -11,20 +11,21 @@
 
 ---
 
-At the time of updating this readme, I have been playing the new Mario Kart on the Nintendo Switch for more than two years.
+At the time of updating this readme (it's been quite a while since creating the repository), I have been playing the new Mario Kart on the Nintendo Switch for more than two years.
 It's a great game, and I love it.
+I would have bought a Switch console just to play it.
 
 The only downside is that I got dragged into the competitive aspect of it, and I'm not that good.
 
-The peculiarity of this game and a new feature introduced in this iteration, is the high level of customization of the karts and the bikes.
-Before playing a Grand Prix, either locally or online, the player must create a build, choosing:
+The peculiarity of this game and a new feature introduced in this iteration is the high level of customization of the karts and the bikes.
+Before playing either locally or online, the player must create a build, choosing:
 
 - A **character**
 - A **bike** or a **kart**
 - The **tyres**
 - The **glider**
 
-each of them with 6 **visible** stats *(ground speed, acceleration, weight, handling, traction, mini turbo)* and 6 more **hidden** stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling)*.
+Each element of the build has 6 **visible** stats *(ground speed, acceleration, weight, handling, traction, mini turbo)* and 7 more **hidden** stats *(air speed, antigravity speed, water speed, water handling, air handling, antigravity handling, invincibility)*.
 
 The question that soon arose was: how can I choose a build *(character, kart, tyres, glider)* that is the best?
 *It is possible to finally defeat the superior Japanese players in the 200cc category?*
@@ -68,8 +69,10 @@ All the data is in a database; all it's needed is to query it and find the best 
 Only recently I found out the power of Python dunder ~~mifflin~~ methods, and I decided to use them.
 *Operators overriding? Count me in!*
 
-I quickly discarded `dataclasses`, as they are not meant to be used as containers for data, but rather as a way to represent data;
-due to my love of reinventing the wheel, I created a new `Entity` class, better suited for my needs.
+I quickly discarded `dataclasses`, as they are not meant to be used as containers for data, but rather as a way to represent data.
+It's hard to correctly structure inheritance and there's no built-in support for `__eq__` and `__add__` methods.
+
+Due to my love of reinventing the wheel, I created a new `Entity` class, better suited for my needs.
 
 ### Create builds
 
@@ -103,9 +106,11 @@ All the entities manipulations are done via dunder methods, which makes the code
 
 The output of the script can be either printed to the console "raw" *(in a human-readable format)*, `json`, `csv`, table formatted in `markdown`, or `toml` format.
 
-## The results - top-k algorithm
+## The (first) results - top-k algorithm
 
-Now the hard part is setting custom weights and filters.
+I initially started searching for the best builds using the top-k algorithm, as it is the most naive one.
+
+The hard part, however, is setting custom weights and filters.
 How is it possible to balance the stats in order to get the best build?
 
 Long before making this program, I read a lot of online articles and watched a lot of videos discussing the best builds.
@@ -172,7 +177,7 @@ However, I needed a better approach to this problem.
 
 ## Alternative, better, solutions - other algorithms
 
-Finding the correct weights is however a bit tricky: it's hard to find the "best" build according to parameters that are not well defined.
+Finding the correct weights, as stated before, is a bit tricky: in fact, it's hard to find the "best" build according to parameters that are not well defined.
 This is why other algorithms *(such as the skyline algorithm)* have been created.
 
 I decided to implement $3$ of them:
@@ -268,7 +273,7 @@ Yielding the following stats:
 ### Kmeans algorithm
 
 The kmeans algorithm is a clustering algorithm that allows to group the builds according to their stats.
-It returns the "centroids" of a set of clusters, which are the builds that are the closest to the mean of the builds in the cluster.
+It returns the *"centroids"* of a set of clusters, which are the builds that are the closest to the mean of the builds in the cluster.
 
 This ensures that the centroid is the most balanced build in the cluster, but it doesn't ensure that it's the best build overall.
 
