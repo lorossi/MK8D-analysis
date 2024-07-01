@@ -36,7 +36,7 @@ class BuildsPrinter:
         Args:
             named_builds (list[NamedBuild])
         """
-        print(f"[{', '.join([b.toJSON(indent=2) for b in named_builds])}")
+        print(f"[{', '.join([b.json_pretty for b in named_builds])}")
 
     @classmethod
     def printMarkdown(cls, named_builds: list[NamedBuild]) -> None:

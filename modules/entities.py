@@ -431,13 +431,15 @@ class NamedBuild:
         def format_val(v: float | int | list[str]) -> str:
             if isinstance(v, list):
                 return ", ".join(v)
+            if isinstance(v, float):
+                return f"{v:.2f}"
 
             return str(v)
 
         attributes = self._getValues(self._hasDataAttributes())
-        return "| " + "|".join(format_val(v) for v in attributes) + "|"
+        return "|" + "|".join(format_val(v) for v in attributes) + "|"
 
-    def toJSON(self, indent=0, sort_keys=False) -> str:
+    def toJSON(self, indent: int = 0, sort_keys=False) -> str:
         """Return the JSON representation of the named build.
 
         Args:
@@ -481,6 +483,15 @@ class NamedBuild:
             str: JSON representation.
         """
         return self.toJSON(indent=0, sort_keys=True)
+
+    @property
+    def json_pretty(self) -> str:
+        """Return the pretty JSON representation of the named build.
+
+        Returns:
+            str: JSON representation.
+        """
+        return self.toJSON(indent=2, sort_keys=True)
 
     @property
     def csv(self) -> str:

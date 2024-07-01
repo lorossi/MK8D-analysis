@@ -191,6 +191,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
         self._data_filter = []  # filter for data attributes such as score or stddev
         self._sort = []  # list of attributes to sort by
         self._limit = None
+        self._seed = None
 
         # weights of the attributes for the score calculation
         self._weights = {k: 0 for k in PARTS_ATTRIBUTES}
