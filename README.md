@@ -5,13 +5,13 @@
 |Driver|Vehicle|Tyre|Glider|
 |:---:|:---:|:---:|:---:|
 |Bowser, Morton|Pipe Frame|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|Petey Piranha|Streetle|Triforce Tyres|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
-|Bowser, Morton|Varmint, City Tripper|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Super Glider, Waddle Wing, Hylian Kite|
+|Petey Piranha|Splat Buggy|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|Wario, Dry Bowser, Funky Kong|Streetle|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|Mario, Ludwig, Mii (medium)|Pipe Frame|Normal, Normal Blue|Super Glider, Waddle Wing, Hylian Kite|
 
 ---
 
-At the time of updating this readme (it's been quite a while since creating the repository), I have been playing the new Mario Kart on the Nintendo Switch for more than two years.
+At the time of updating this readme *(it's been quite a while since I've created the repository)*, I have been playing the new Mario Kart on the Nintendo Switch for more than two years.
 It's a great game, and I love it.
 I would have bought a Switch console just to play it.
 
@@ -108,7 +108,7 @@ The output of the script can be either printed to the console "raw" *(in a human
 
 ## The (first) results - top-k algorithm
 
-I initially started searching for the best builds using the top-k algorithm, as it is the most naive one.
+I initially started searching for the best builds using the top-k algorithm, as it is the easiest to implement *(and the only one I knew at the time).*
 
 The hard part, however, is setting custom weights and filters.
 How is it possible to balance the stats in order to get the best build?
@@ -128,26 +128,26 @@ So I tweaked the weights and the filters, finally setting:
 - The **minimum ground speed** to 12
 - The **minimum ground acceleration** to 12
 - The **minimum miniturbo** to 5
-- **Ground speed** weight to 0.5
+- **Ground speed** weight to 0.25
 - **Acceleration** weight to 0.5
-- **Miniturbo** weight to 0.1
+- **Miniturbo** weight to 0.5
 
 The top 5 builds, selected via top-k algorithm, sorted by *score* and the *standard deviation* of the stats, are the following:
 
 |score|score_dev|id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|14.40|2.99|9137|12|17|15|12|14|11|10|8|8|9|14|10|9|9|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|14.40|2.99|9139|12|16|15|12|14|12|10|9|8|8|14|11|8|9|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
-|14.40|2.99|9585|12|19|16|11|14|10|9|9|9|7|14|7|11|8|Bowser, Morton|Landship|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|14.40|2.99|9587|12|18|16|11|14|11|9|10|9|6|14|8|10|8|Bowser, Morton|Landship|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
-|14.40|2.99|9921|12|17|15|12|14|11|10|8|8|9|14|10|9|8|Bowser, Morton|Varmint, City Tripper|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|17.00|2.31|9137|12|17|15|12|14|11|10|8|8|9|14|10|9|9|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|17.00|2.31|9139|12|16|15|12|14|12|10|9|8|8|14|11|8|9|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|17.00|2.31|9585|12|19|16|11|14|10|9|9|9|7|14|7|11|8|Bowser, Morton|Landship|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|17.00|2.31|9587|12|18|16|11|14|11|9|10|9|6|14|8|10|8|Bowser, Morton|Landship|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|17.00|2.31|9921|12|17|15|12|14|11|10|8|8|9|14|10|9|8|Bowser, Morton|Varmint, City Tripper|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
 
 The command used to generate this table is:
 
 ```bash
 python3 find_builds.py  --limit 5 --topk \
   --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
-  --query-weights weight_ground_speed=0.5 weight_acceleration=0.5 weight_miniturbo=0.1 \
+  --query-weights weight_ground_speed=0.25 weight_acceleration=0.5 weight_miniturbo=0.5 \
   --query-sort sort_score=-1 sort_score_dev=-1 \
   --markdown
 ```
@@ -167,7 +167,7 @@ Yielding the following stats:
 - **Weight**: 11
 - **Ground handling**: 10
 
-With a score of $14.40$ and a standard deviation of $2.99$.
+With a score of $17.00$ and a standard deviation of $2.32$.
 
 I played a bit with this build, and I can say that it is pretty good.
 I feel like it's lacking a little bit of acceleration, but if the player manages to get a good jump ahead of everyone else and build a good gap, it's pretty hard to catch up.
@@ -193,38 +193,42 @@ Their results and explanations are shown below.
 The Medrank algorithm allows to compare the stats of the builds without having to rank them according arbitrary weights.
 It works by comparing the stats of the builds to the median of the stats of all the builds; the builds with the best mean positions are then selected.
 
-The command to use this algorithm is:
+I decided to consider only acceleration and miniturbo, following the same reasoning as before.
+
+The command to use this algorithm with the previous filters is:
 
 ```bash
 python3 find_builds.py --limit 5 --medrank \
   --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
-  --ranking-attributes rank_ground_speed=1 rank_acceleration=1 \
-  --query-sort sort_ground_speed=-1 sort_acceleration=-1 \
+  --ranking-attributes rank_miniturbo=1 rank_acceleration=1 \
+  --query-sort sort_miniturbo=-1 sort_acceleration=-1 sort_ground_speed=-1 \
   --markdown
 ```
 
+The corresponding output is:
+
 |id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|25475|13|17|12|11|12|14|9|10|10|7|12|13|13|14|Petey Piranha|Streetle|Triforce Tyres|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
-|25471|12|16|14|11|13|13|11|12|11|8|13|12|12|14|Petey Piranha|Streetle|GLA Wheels|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
-|25469|12|17|14|11|13|12|11|11|11|9|13|11|13|14|Petey Piranha|Streetle|GLA Wheels|Cloud Glider, Parachute, Flower Glider, Paper Glider|
 |25603|12|13|15|13|12|11|10|11|10|12|13|11|8|9|Petey Piranha|Splat Buggy|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
 |25601|12|14|15|13|12|10|10|10|10|13|13|10|9|9|Petey Piranha|Splat Buggy|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|25475|13|17|12|11|12|14|9|10|10|7|12|13|13|14|Petey Piranha|Streetle|Triforce Tyres|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|25473|13|18|12|11|12|13|9|9|10|8|12|12|14|14|Petey Piranha|Streetle|Triforce Tyres|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|25470|13|16|15|11|12|14|11|12|10|8|12|12|12|15|Petey Piranha|Streetle|GLA Wheels|Wario Wing, Plane Glider, Gold Glider, Paraglider|
 
 The best build according to the Medrank algorithm is the one with the following build:
 
 - **Driver**: Petey Piranha
-- **Vehicle**: Streetle
-- **Tyre**: Triforce Tyres
+- **Vehicle**: Splat Buggy
+- **Tyre**: Roller, Azure Roller
 - **Glider**: Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil
 
 Yielding the following stats:
 
-- **Ground speed**: 13
+- **Ground speed**: 12
 - **Acceleration**: 12
-- **Miniturbo**: 12
-- **Weight**: 14
-- **Ground handling**: 9
+- **Miniturbo**: 13
+- **Weight**: 11
+- **Ground handling**: 10
 
 ### Skyline algorithm
 
@@ -242,32 +246,32 @@ The command to use this algorithm is:
 ```bash
 python3 find_builds.py --limit 5 --skyline \
   --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
-  --query-sort sort_acceleration=-1 sort_ground_speed=-1 \
-  --ranking-attributes rank_ground_speed=1 rank_acceleration=1 \
+  --ranking-attributes rank_acceleration=1 rank_miniturbo=1 \
+  --query-sort sort_miniturbo=-1 sort_acceleration=-1 sort_ground_speed=-1 \
   --markdown
 ```
 
 |id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|9921|12|17|15|12|14|11|10|8|8|9|14|10|9|8|Bowser, Morton|Varmint, City Tripper|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|11826|12|17|16|10|14|10|11|12|10|8|14|12|10|8|Donkey Kong, Waluigi, Roy, Wiggler|Streetle|Roller, Azure Roller|Wario Wing, Plane Glider, Gold Glider, Paraglider|
-|12945|12|17|15|12|14|10|11|9|9|10|14|9|10|7|Wario, Dry Bowser, Funky Kong|Varmint, City Tripper|Roller, Azure Roller|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|11434|12|15|15|11|14|11|12|11|9|10|14|15|8|7|Donkey Kong, Waluigi, Roy, Wiggler|Varmint, City Tripper|Roller, Azure Roller|Wario Wing, Plane Glider, Gold Glider, Paraglider|
-|11096|12|18|16|9|14|9|11|11|10|9|14|11|11|7|Donkey Kong, Waluigi, Roy, Wiggler|Landship|Roller, Azure Roller|Super Glider, Waddle Wing, Hylian Kite|
+|13339|12|18|16|11|14|10|10|11|10|7|14|7|11|8|Wario, Dry Bowser, Funky Kong|Streetle|Roller, Azure Roller|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|11843|12|16|14|12|14|9|10|11|9|8|14|13|9|10|Donkey Kong, Waluigi, Roy, Wiggler|Streetle|Button, Leaf Tyres|Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil|
+|11449|12|15|13|13|14|9|11|9|8|11|14|15|8|9|Donkey Kong, Waluigi, Roy, Wiggler|Varmint, City Tripper|Button, Leaf Tyres|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|11841|12|17|14|12|14|8|10|10|9|9|14|12|10|10|Donkey Kong, Waluigi, Roy, Wiggler|Streetle|Button, Leaf Tyres|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|10650|12|15|15|11|14|11|12|11|9|10|14|15|8|8|Donkey Kong, Waluigi, Roy, Wiggler|Pipe Frame|Roller, Azure Roller|Wario Wing, Plane Glider, Gold Glider, Paraglider|
 
 The best build according to the Skyline algorithm is the one with the following build:
 
-- **Driver**: Bowser, Morton
-- **Vehicle**: Varmint, City Tripper
+- **Driver**: Wario, Dry Bowser, Funky Kong
+- **Vehicle**: Streetle
 - **Tyre**: Roller, Azure Roller
-- **Glider**: Cloud Glider, Parachute, Flower Glider, Paper Glider
+- **Glider**: Peach Parasol, Parafoil, Bowser Kite, MKTV Parafoil
 
 Yielding the following stats:
 
 - **Ground speed**: 12
 - **Acceleration**: 14
 - **Miniturbo**: 14
-- **Weight**: 11
+- **Weight**: 10
 - **Ground handling**: 10
 
 ### Kmeans algorithm
@@ -282,34 +286,34 @@ The command to use this algorithm is:
 ```bash
 python3 find_builds.py --limit 5 --k-means \
   --query-filters min_ground_speed=12 min_acceleration=12 min_miniturbo=5 \
-  --query-sort sort_acceleration=-1 sort_ground_speed=-1 \
-  --ranking-attributes rank_ground_speed=1 rank_acceleration=1 \
+  --ranking-attributes rank_acceleration=1 rank_miniturbo=1 \
+  --query-sort sort_miniturbo=-1 sort_acceleration=-1 sort_ground_speed=-1 \
   --seed 42 \
   --markdown
 ```
 
 |id|ground_speed|water_speed|air_speed|antigravity_speed|acceleration|weight|ground_handling|water_handling|air_handling|antigravity_handling|miniturbo|on_road_traction|off_road_traction|invincibility|driver|vehicle|tyre|glider |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|9136|13|17|16|11|13|12|10|8|7|9|13|10|9|10|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Super Glider, Waddle Wing, Hylian Kite|
 |56|12|14|13|10|13|10|13|11|10|12|14|10|12|11|Mario, Ludwig, Mii (medium)|Pipe Frame|Normal, Normal Blue|Super Glider, Waddle Wing, Hylian Kite|
 |1|12|14|14|13|12|10|11|9|12|11|14|10|11|10|Mario, Ludwig, Mii (medium)|Standard Kart, The Duke|Normal, Normal Blue|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|1|12|14|14|13|12|10|11|9|12|11|14|10|11|10|Mario, Ludwig, Mii (medium)|Standard Kart, The Duke|Normal, Normal Blue|Cloud Glider, Parachute, Flower Glider, Paper Glider|
-|1|12|14|14|13|12|10|11|9|12|11|14|10|11|10|Mario, Ludwig, Mii (medium)|Standard Kart, The Duke|Normal, Normal Blue|Cloud Glider, Parachute, Flower Glider, Paper Glider|
+|9136|13|17|16|11|13|12|10|8|7|9|13|10|9|10|Bowser, Morton|Pipe Frame|Roller, Azure Roller|Super Glider, Waddle Wing, Hylian Kite|
+|84|13|15|11|10|12|11|11|9|9|11|13|11|13|13|Mario, Ludwig, Mii (medium)|Pipe Frame|Off-Road, Retro Off-Road|Super Glider, Waddle Wing, Hylian Kite|
+|84|13|15|11|10|12|11|11|9|9|11|13|11|13|13|Mario, Ludwig, Mii (medium)|Pipe Frame|Off-Road, Retro Off-Road|Super Glider, Waddle Wing, Hylian Kite|
 
 The best build according to the Kmeans algorithm is the one with the following build:
 
 - **Driver**: Mario, Ludwig, Mii (medium)
 - **Vehicle**: Pipe Frame
-- **Tyre**: Roller, Azure Roller
+- **Tyre**: Normal, Normal Blue
 - **Glider**: Super Glider, Waddle Wing, Hylian Kite
 
 Yielding the following stats:
 
 - **Ground speed**: 12
-- **Acceleration**: 12
+- **Acceleration**: 13
 - **Miniturbo**: 14
 - **Weight**: 10
-- **Ground handling**: 11
+- **Ground handling**: 13
 
 ## The code
 
