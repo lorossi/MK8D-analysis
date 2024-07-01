@@ -410,7 +410,7 @@ class NamedBuild:
             str
         """
         attributes = self._getKeys(self._hasDataAttributes())
-        return "| " + "|".join(attributes) + " |\n" + "|:---:" * len(attributes) + "|"
+        return "|" + "|".join(attributes) + " |\n" + "|:---:" * len(attributes) + "|"
 
     def toCSV(self) -> str:
         """Return the CSV representation of the named build.
