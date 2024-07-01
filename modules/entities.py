@@ -7,7 +7,7 @@ from statistics import stdev
 
 from ujson import dumps
 
-from .constants import ID_ATTRIBUTES, PARTS_ATTRIBUTES, EntityId
+from .constants import DATA_ATTRIBUTES, ID_ATTRIBUTES, PARTS_ATTRIBUTES, EntityId
 
 
 class Entity:
@@ -343,17 +343,57 @@ class NamedBuild:
 
         return sqrt(distance)
 
-    def toJSON(self, indent=0, sort_keys=False) -> str:
-        """Return the JSON representation of the named build.
+    def _getKeys(self, keep_data_attributes: bool = True) -> list[str]:
+        """Return the keys of the named build.
 
         Args:
-            indent (int, optional): Indentation of the lines. Defaults to 0.
-            sort_keys (bool, optional). Defaults to False.
+            keep_data_attributes (bool, optional): Keep the data attributes. \
+                Defaults to True.
 
         Returns:
-            str
+            list[str]: The keys of the named build.
         """
-        return dumps(self.attributes, indent=indent, sort_keys=sort_keys)
+        keys = list(self.attributes.keys())
+        if keep_data_attributes:
+            return keys
+
+        for attribute in DATA_ATTRIBUTES:
+            keys.remove(attribute)
+
+        return keys
+
+    def _getValues(
+        self,
+        keep_data_attributes: bool = True,
+    ) -> list[float | int | list[str]]:
+        """Return the values of the named build.
+
+        Args:
+            keep_data_attributes (bool, optional): Keep the data attributes. \
+                Defaults to True.
+
+        Returns:
+            list[float | int | list[str]]: The values of the named build.
+        """
+        if keep_data_attributes:
+            return list(self.attributes.values())
+
+        values = []
+        for key in self._getKeys(keep_data_attributes=False):
+            values.append(self.attributes[key])
+
+        return values
+
+    def _hasDataAttributes(self) -> bool:
+        """Check if the data attributes are present in the named build.
+
+        Returns:
+            bool: True if the data attributes are present, False otherwise.
+        """
+        total_attributes_sum = sum(
+            self.attributes[attribute] for attribute in DATA_ATTRIBUTES
+        )
+        return total_attributes_sum != 0
 
     def csvHeader(self) -> str:
         """Return the csv header of the named build.
@@ -361,7 +401,7 @@ class NamedBuild:
         Returns:
             str
         """
-        return ",".join(k for k in self.attributes.keys())
+        return ",".join(self._getKeys(self._hasDataAttributes()))
 
     def markdownHeader(self) -> str:
         """Return the markdown header of the named build.
@@ -369,12 +409,8 @@ class NamedBuild:
         Returns:
             str
         """
-        return (
-            "|"
-            + "|".join(k for k in self.attributes.keys())
-            + " |\n"
-            + "|:---:" * len(self.attributes.keys())
-        ) + "|"
+        attributes = self._getKeys(self._hasDataAttributes())
+        return "| " + "|".join(attributes) + " |\n" + "|:---:" * len(attributes) + "|"
 
     def toCSV(self) -> str:
         """Return the CSV representation of the named build.
@@ -382,7 +418,8 @@ class NamedBuild:
         Returns:
             str
         """
-        return ",".join(str(v) for v in self.attributes.values())
+        attributes = self._getValues(self._hasDataAttributes())
+        return ",".join(str(v) for v in attributes)
 
     def toMarkdown(self) -> str:
         """Return the markdown representation of the named build.
@@ -397,9 +434,25 @@ class NamedBuild:
 
             return str(v)
 
-        return "| " + " | ".join(format_val(v) for v in self.attributes.values()) + " |"
+        attributes = self._getValues(self._hasDataAttributes())
+        return "| " + "|".join(format_val(v) for v in attributes) + "|"
 
-        return
+    def toJSON(self, indent=0, sort_keys=False) -> str:
+        """Return the JSON representation of the named build.
+
+        Args:
+            indent (int, optional): Indentation of the lines. Defaults to 0.
+            sort_keys (bool, optional). Defaults to False.
+
+        Returns:
+            str
+        """
+        to_dump = self.attributes
+        if not self._hasDataAttributes():
+            for attribute in DATA_ATTRIBUTES:
+                to_dump.pop(attribute)
+
+        return dumps(to_dump, indent=indent, sort_keys=sort_keys)
 
     @property
     def attributes(self) -> dict[str, float | int | list[str]]:
