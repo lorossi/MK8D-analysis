@@ -380,6 +380,13 @@ class MK8DeluxeBuilds(MK8Deluxe):
             self._sort = []
             return
 
+        # set the seed
+        if __name == "seed":
+            if not isinstance(__value, int):
+                raise TypeError(f"{__value} is not a valid seed")
+            self._seed = __value
+            return
+
         return super().__setattr__(__name, __value)
 
     def getNames(self, entity_id: EntityId, entity_code: int) -> list[str]:
@@ -423,6 +430,7 @@ class MK8DeluxeBuilds(MK8Deluxe):
             limit=self._limit,
             weight=self._weights,
             rank_attributes=self._rank_attributes,
+            seed=self._seed,
         )
         return self._returnBuilds(sorted_builds)
 

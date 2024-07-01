@@ -50,6 +50,10 @@ def find(parameters: argparse.Namespace) -> None:
         for key, value in parameters.ranking_attributes.items():
             setattr(m, key, value)
 
+    # set the seed for the random number generator
+    if parameters.seed is not None:
+        m.seed = parameters.seed
+
     # use m.limit to set the maximum number of results to return
     m.limit = parameters.limit
 
@@ -210,6 +214,13 @@ def main():
         nargs="+",
         help="Attributes to apply to the ranked query.",
         action=AttributesParser,
+    )
+
+    parameters_parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Seed for the random number generator. Used only for the K-Means algorithm.",
     )
 
     args = parser.parse_args()
