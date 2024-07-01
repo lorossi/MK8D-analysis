@@ -6,6 +6,7 @@ The class offers the ability to sort, filter and score each of them.
 
 import argparse
 
+from modules.algorithms import AlgorithmName
 from modules.builds_printer import BuildsPrinter
 from modules.command_parsers import (
     AttributesParser,
@@ -55,14 +56,14 @@ def find(parameters: argparse.Namespace) -> None:
     # builds can be either be scored (and then accessed via m.scored_named_builds)
     # or the best builds can be computed via the various implemented algorithms
     # (skyline, topk, kmeans, medrank)
-    if parameters.topk:
-        m.algorithm = "topk"
-    elif parameters.skyline:
-        m.algorithm = "skyline"
+    if parameters.skyline:
+        m.algorithm = AlgorithmName.SKYLINE
+    elif parameters.topk:
+        m.algorithm = AlgorithmName.TOPK
     elif parameters.k_means:
-        m.algorithm = "kmeans"
+        m.algorithm = AlgorithmName.KMEANS
     elif parameters.medrank:
-        m.algorithm = "medrank"
+        m.algorithm = AlgorithmName.MEDRANK
 
     builds = m.sortBuilds()
 

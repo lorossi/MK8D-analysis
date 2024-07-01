@@ -3,9 +3,19 @@
 from __future__ import annotations
 
 import random
+from enum import Enum
 from time import time
 
 from modules.entities import NamedBuild
+
+
+class AlgorithmName(Enum):
+    """Name of the algorithms available."""
+
+    TOPK = "topk"
+    SKYLINE = "skyline"
+    KMEANS = "kmeans"
+    MEDRANK = "medrank"
 
 
 class Algorithms:
@@ -18,24 +28,21 @@ class Algorithms:
             Algorithms
         """
         self._algorithms = {
-            "topk": self._topk,
-            "skyline": self._skyline,
-            "kmeans": self._kmeans,
-            "medrank": self._medrank,
+            AlgorithmName.TOPK.value: self._topk,
+            AlgorithmName.SKYLINE.value: self._skyline,
+            AlgorithmName.KMEANS.value: self._kmeans,
+            AlgorithmName.MEDRANK.value: self._medrank,
         }
 
         self._current_algorithm = None
 
-    def setAlgorithm(self, algorithm: str):
+    def setAlgorithm(self, algorithm: AlgorithmName) -> None:
         """Set the algorithm to use.
 
         Args:
-            algorithm (str)
+            algorithm (AlgorithmName)
         """
-        if algorithm not in self._algorithms:
-            raise ValueError(f"Algorithm {algorithm} not supported")
-
-        self._current_algorithm = self._algorithms[algorithm]
+        self._current_algorithm = self._algorithms[algorithm.value]
 
     def runAlgorithm(self, builds: list[NamedBuild], **kwargs) -> list[NamedBuild]:
         """Run the algorithm.
@@ -100,7 +107,7 @@ class Algorithms:
         sorted_builds = []
 
         for x, a in enumerate(attributes):
-            lists[x] = sorted(builds, key=lambda x: x.__getattribute__(a))
+            lists[x] = sorted(builds, key=lambda x: x.__getattribute__(a), reverse=True)
 
         for x, b in enumerate(builds):
             positions = [len(builds) for _ in range(len(attributes))]
@@ -112,25 +119,6 @@ class Algorithms:
             median = sorted(positions)[len(positions) // 2]
             sorted_builds.append((median, b))
 
-        sorted_builds.sort(key=lambda x: x[0])
+        sorted_builds.sort(key=lambda x: x[0], reverse=True)
 
         return [b for _, b in sorted_builds[:limit]]
-
-    @property
-    def available_algorithms(self) -> list[str]:
-        """Get the available algorithms.
-
-        Returns:
-            list[str]
-        """
-        return list(self._algorithms.keys())
-
-    @property
-    def current_algorithm(self) -> str:
-        """
-        Get the current algorithm.
-
-        Returns:
-            str
-        """
-        return self._current_algorithm

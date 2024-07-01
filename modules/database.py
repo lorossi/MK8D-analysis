@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from re import Match, match
 
-from .algorithms import Algorithms
+from .algorithms import AlgorithmName, Algorithms
 from .constants import (
     DATA_ATTRIBUTES,
     ID_ATTRIBUTES,
@@ -436,17 +436,14 @@ class MK8DeluxeBuilds(MK8Deluxe):
         return self._algorithms.current_algorithm
 
     @algorithm.setter
-    def algorithm(self, value: str) -> None:
+    def algorithm(self, value: AlgorithmName):
         """Set the algorithm.
 
         Args:
-            value (str): name of the algorithm.
-
+            value (AlgorithmName): name of the algorithm.
         Raises:
             ValueError: algorithm is not valid.
         """
-        if value not in self._algorithms.available_algorithms:
-            raise ValueError(f"{value} is not a valid algorithm")
         self._algorithms.setAlgorithm(value)
 
     @property
